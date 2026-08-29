@@ -4700,18 +4700,6 @@ main {
   line-height: 1.35 !important;
 }
 
-.outcome-illustration {
-  width: min(230px, 58vw);
-  aspect-ratio: 1;
-  margin: 0 auto 14px;
-  border: 4px solid #d49b45;
-  border-radius: 26px;
-  background-image: url("assets/empanada-estropeada.jpg");
-  background-position: center;
-  background-size: cover;
-  box-shadow: 0 14px 25px rgba(24,8,4,0.42), inset 0 0 0 2px rgba(255,239,191,0.28);
-}
-
 .ending-actions {
   display: flex;
   justify-content: center;
@@ -4734,15 +4722,14 @@ main {
     url("assets/fondo-desastre-cocina.jpg");
 }
 
-.complete-screen[data-outcome="spoiled"] {
+.complete-screen.is-failed:not([data-outcome="burned"]) {
   background-image:
     radial-gradient(circle at 50% 48%, rgba(107, 180, 55, 0.22), transparent 34%),
     linear-gradient(rgba(27, 12, 7, 0.3), rgba(16, 8, 7, 0.58)),
     url("assets/mesa-yungas-mobile.jpg");
 }
 
-.complete-screen[data-outcome="burned"] .victory-board,
-.complete-screen[data-outcome="spoiled"] .victory-board {
+.complete-screen.is-failed .victory-board {
   width: min(760px, 96vw);
   grid-template-columns: 1fr;
   grid-template-areas: "copy";
@@ -4754,18 +4741,16 @@ main {
   box-shadow: inset 0 0 0 3px #3b211b, inset 0 0 48px rgba(18,18,18,0.34), 0 30px 70px rgba(0,0,0,0.58);
 }
 
-.complete-screen[data-outcome="spoiled"] .victory-board {
+.complete-screen.is-failed:not([data-outcome="burned"]) .victory-board {
   border-color: #779d45;
   box-shadow: inset 0 0 0 3px #2d3a21, inset 0 0 48px rgba(82,140,45,0.2), 0 30px 70px rgba(0,0,0,0.58);
 }
 
-.complete-screen[data-outcome="burned"] .victory-trophy,
-.complete-screen[data-outcome="spoiled"] .victory-trophy {
+.complete-screen.is-failed .victory-trophy {
   display: none;
 }
 
-.complete-screen[data-outcome="burned"] .complete-copy,
-.complete-screen[data-outcome="spoiled"] .complete-copy {
+.complete-screen.is-failed .complete-copy {
   width: min(650px, 100%);
   justify-self: center;
 }
@@ -4775,9 +4760,44 @@ main {
   text-shadow: 0 4px 0 #6a2119, 0 9px 22px rgba(10,5,3,0.62);
 }
 
-.complete-screen[data-outcome="spoiled"] .complete-copy h1 {
+.complete-screen.is-failed:not([data-outcome="burned"]) .complete-copy h1 {
   color: #e4f2a5;
   text-shadow: 0 4px 0 #365126, 0 9px 22px rgba(10,5,3,0.62);
+}
+
+.did-you-know {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 42;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 11px;
+  width: min(440px, calc(100vw - 36px));
+  padding: 14px 13px;
+  color: #3b2418;
+  border: 1px solid rgba(108, 70, 34, 0.24);
+  border-left: 5px solid #4d7c42;
+  border-radius: 17px;
+  background: rgba(255, 248, 224, 0.97);
+  box-shadow: 0 12px 30px rgba(46, 25, 13, 0.2);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  pointer-events: none;
+}
+
+.did-you-know.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.did-you-know-mark { display: grid; place-items: center; width: 34px; height: 34px; color: #fff3b4; border-radius: 50%; background: #4d7c42; font-size: 18px; }
+.did-you-know small { display: block; color: #9b4b28; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.did-you-know p { margin: 4px 0 0; font-size: 14px; line-height: 1.42; }
+.did-you-know button { width: 32px; height: 32px; padding: 0; color: #6f5141; border: 0; border-radius: 50%; background: transparent; font-size: 24px; line-height: 1; touch-action: manipulation; }
+.did-you-know button:hover, .did-you-know button:focus-visible { color: #fff; background: #9b4b28; }
+
+@media (max-width: 600px) {
+  .did-you-know { left: 10px; right: 66px; bottom: 12px; width: auto; padding: 12px 10px; }
+  .did-you-know p { font-size: 12px; }
 }
 
 @media (max-width: 900px), (max-height: 700px) {

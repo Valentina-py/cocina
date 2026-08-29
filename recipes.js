@@ -21,6 +21,21 @@ window.KITCHEN_DATA = {
       title: "Alquimista del Desastre",
       description: "Probaste tantos ingredientes ajenos a la comanda que encontraste el camino de la mezcla imposible."
     },
+    cucharon_porfiado: {
+      icon: "🥄",
+      title: "Cucharón Porfiado",
+      description: "Insististe tres veces con el mismo ingrediente y descubriste que una receta también sabe decir que no."
+    },
+    fogon_dormido: {
+      icon: "🪵",
+      title: "Guardián/a de las Brasas Dormidas",
+      description: "Completaste la comanda, pero el fuego quedó tan bajo que la preparación no alcanzó su punto."
+    },
+    termometro_bailarin: {
+      icon: "🌡️",
+      title: "Termómetro Bailarín",
+      description: "Subiste y bajaste el fuego tantas veces que la cocción perdió su ritmo."
+    },
     pulso_del_fogon: {
       icon: "🌡️",
       title: "Pulso del Fogón",
@@ -32,6 +47,17 @@ window.KITCHEN_DATA = {
       description: "Transformaste una receta siguiendo la pista de una variación regional."
     }
   },
+
+  didYouKnow: [
+    "La empanada salteña suele ser pequeña, jugosa y llevar papa junto con carne cortada a cuchillo.",
+    "La empanada tucumana se reconoce por el matambre, el verdeo y el limón que suele acompañarla al servir.",
+    "El nombre humita se vincula con la voz quechua humint'a y con una antigua tradición andina del maíz.",
+    "La chala no es solo un envoltorio: protege la humedad y aporta aroma durante la cocción de humitas y tamales.",
+    "El locro reúne raíces prehispánicas y aportes criollos; por eso existen tantas versiones como comunidades que lo cocinan.",
+    "La palabra tamal proviene del náhuatl tamalli, asociada a una preparación envuelta.",
+    "El charqui permitió conservar carne mediante salado y secado mucho antes de que existieran las heladeras.",
+    "La cocina del NOA guarda encuentros entre saberes indígenas, andinos y criollos en cada receta familiar."
+  ],
 
   ingredients: {
     carne: { name: "Carne a cuchillo", icon: "🥩", tone: "red" },

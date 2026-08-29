@@ -52,7 +52,8 @@
     toastClose: document.querySelector("#toast-close"),
     completeTitle: document.querySelector("#complete-title"),
     completeMessage: document.querySelector("#complete-message"),
-    outcomeIllustration: document.querySelector("#outcome-illustration"),
+    endingEyebrow: document.querySelector("#ending-eyebrow"),
+    achievementLabel: document.querySelector("#achievement-label"),
     achievementTitle: document.querySelector("#achievement-title"),
     secretAchievement: document.querySelector("#secret-achievement"),
     secretAchievementIcon: document.querySelector("#secret-achievement-icon"),
@@ -71,6 +72,9 @@
     cookbookNav: document.querySelector("#cookbook-nav"),
     cookbookContent: document.querySelector("#cookbook-content"),
     scrollTopButton: document.querySelector("#scroll-top"),
+    didYouKnow: document.querySelector("#did-you-know"),
+    didYouKnowText: document.querySelector("#did-you-know-text"),
+    didYouKnowClose: document.querySelector("#did-you-know-close"),
     yaguareteCursor: document.querySelector("#yaguarete-cursor")
   };
 
@@ -90,8 +94,15 @@
     ending: false,
     heat: 45,
     wrongAttempts: 0,
+    wrongIngredients: new Map(),
+    heatMoves: 0,
+    lastHeatDirection: 0,
+    heatDirectionChanges: 0,
     recoveredHeat: false,
-    sessionAchievements: new Set()
+    sessionAchievements: new Set(),
+    factTimer: null,
+    factHideTimer: null,
+    factIndex: Math.floor(Math.random() * Math.max(1, DATA.didYouKnow?.length || 1))
   };
 
   const ACHIEVEMENT_STORAGE_KEY = "fogon-noa-logros-ocultos";
@@ -587,9 +598,14 @@
     state.ending = false;
     state.heat = 45;
     state.wrongAttempts = 0;
+    state.wrongIngredients = new Map();
+    state.heatMoves = 0;
+    state.lastHeatDirection = 0;
+    state.heatDirectionChanges = 0;
     state.recoveredHeat = false;
     state.sessionAchievements = new Set();
     state.sessionActive = true;
+    hideDidYouKnow(false);
     el.menuNotice.hidden = true;
     activateScreen(el.gameScreen);
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -708,6 +724,10 @@
     if (!state.recipeId || state.completed || state.ending) return;
     noteActivity();
     const previousHeat = state.heat;
+    const direction = Math.sign(delta);
+    state.heatMoves += 1;
+    if (state.lastHeatDirection && direction !== state.lastHeatDirection) state.heatDirectionChanges += 1;
+    state.lastHeatDirection = direction;
     state.heat = Math.max(10, Math.min(100, state.heat + delta));
 
     if (previousHeat >= 80 && state.heat <= 75) {
@@ -804,6 +824,8 @@
     const explanation = familyReasons[id] || familyReasons.default || "No figura en la comanda de esta versión.";
 
     state.wrongAttempts += 1;
+    const repeatedCount = (state.wrongIngredients.get(id) || 0) + 1;
+    state.wrongIngredients.set(id, repeatedCount);
     playErrorSound();
     el.toastTitle.textContent = "Ese ingrediente no va en esta receta";
     el.toastMessage.textContent = state.wrongAttempts >= 3
@@ -819,7 +841,7 @@
       token?.classList.remove("is-rejected");
     }, 720);
     showToast(9000, "error");
-    if (state.wrongAttempts >= 3) scheduleFailure("spoiled", 1250);
+    if (state.wrongAttempts >= 3) scheduleFailure(repeatedCount >= 3 ? "stubborn" : "spoiled", 1250);
   }
 
   function transformRecipe(variation, triggerId) {
@@ -856,7 +878,14 @@
   function checkCompletion() {
     const current = recipe();
     if (!current || state.completed || state.ending) return;
-    if (current.required.every((id) => state.added.has(id))) completeRecipe();
+    if (!current.required.every((id) => state.added.has(id))) return;
+    if (state.heat <= 25) {
+      scheduleFailure("undercooked", 450);
+    } else if (state.heatMoves >= 6 && state.heatDirectionChanges >= 3) {
+      scheduleFailure("unstable", 450);
+    } else {
+      completeRecipe();
+    }
   }
 
   function latestSessionAchievement() {
@@ -878,6 +907,24 @@
         message: `Tres ingredientes que no pertenecían a la comanda estropearon ${current.name}. Leé las explicaciones y volvé a probar otra combinación.`,
         achievement: "Alquimista del Desastre",
         achievementId: "mezcla_imposible"
+      },
+      stubborn: {
+        title: "¡El cucharón se puso porfiado!",
+        message: `Insististe tres veces con el mismo ingrediente aunque no pertenecía a ${current.name}. La comanda explicó el motivo, pero la mezcla terminó perdiendo su identidad.`,
+        achievement: "Cucharón Porfiado",
+        achievementId: "cucharon_porfiado"
+      },
+      undercooked: {
+        title: "¡Las brasas se quedaron dormidas!",
+        message: `Agregaste todos los ingredientes de ${current.name}, pero el fuego quedó demasiado bajo. La preparación no alcanzó la temperatura necesaria para cocinarse correctamente.`,
+        achievement: "Guardián/a de las Brasas Dormidas",
+        achievementId: "fogon_dormido"
+      },
+      unstable: {
+        title: "¡El fuego perdió el ritmo!",
+        message: `Subiste y bajaste la intensidad demasiadas veces mientras preparabas ${current.name}. Los cambios bruscos dejaron una cocción despareja.`,
+        achievement: "Termómetro Bailarín",
+        achievementId: "termometro_bailarin"
       }
     };
     const outcome = outcomes[type] || outcomes.spoiled;
@@ -890,10 +937,12 @@
     unlockAchievement(outcome.achievementId);
 
     el.completeScreen.dataset.outcome = type;
+    el.completeScreen.classList.add("is-failed");
+    el.endingEyebrow.textContent = "Final alternativo · Qué pasó";
+    el.achievementLabel.textContent = "Logro oculto obtenido";
     el.completeTitle.textContent = outcome.title;
     el.completeMessage.textContent = outcome.message;
     el.achievementTitle.textContent = outcome.achievement;
-    el.outcomeIllustration.hidden = type !== "spoiled";
     el.victoryForm.reset();
     el.victoryForm.hidden = true;
     el.victorySignature.hidden = true;
@@ -902,7 +951,8 @@
     el.playAgain.textContent = "Elegir otro plato";
     el.victoryQrCard.hidden = true;
     renderSecretAchievement(outcome.achievementId);
-    el.statusText.textContent = type === "burned" ? "Preparación quemada" : "Preparación estropeada";
+    const statusByOutcome = { burned: "Preparación quemada", spoiled: "Mezcla estropeada", stubborn: "Ingrediente repetido", undercooked: "Preparación sin cocción", unstable: "Cocción despareja" };
+    el.statusText.textContent = statusByOutcome[type] || "Preparación estropeada";
     el.idleIndicator.hidden = true;
     activateScreen(el.completeScreen);
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -920,10 +970,12 @@
     const current = recipe();
 
     el.completeScreen.dataset.outcome = "success";
+    el.completeScreen.classList.remove("is-failed");
+    el.endingEyebrow.textContent = "¡Receta completada!";
+    el.achievementLabel.textContent = "Título obtenido";
     el.completeTitle.textContent = "¡El fogón está de fiesta!";
     el.completeMessage.textContent = `Completaste ${current.name}. Cada ingrediente cuenta una historia de territorio, intercambio y memoria.`;
     el.achievementTitle.textContent = current.achievement;
-    el.outcomeIllustration.hidden = true;
     el.victoryForm.reset();
     el.victoryForm.hidden = false;
     el.victorySignature.hidden = true;
@@ -1015,6 +1067,33 @@
     }, 220);
   }
 
+  function scheduleDidYouKnow(delayMs = 6500) {
+    window.clearTimeout(state.factTimer);
+    if (!DATA.didYouKnow?.length || !el.menuScreen.classList.contains("is-active")) return;
+    state.factTimer = window.setTimeout(showDidYouKnow, delayMs);
+  }
+
+  function showDidYouKnow() {
+    if (!el.menuScreen.classList.contains("is-active") || !DATA.didYouKnow?.length) return;
+    const fact = DATA.didYouKnow[state.factIndex % DATA.didYouKnow.length];
+    state.factIndex = (state.factIndex + 1) % DATA.didYouKnow.length;
+    el.didYouKnowText.textContent = fact;
+    el.didYouKnow.hidden = false;
+    requestAnimationFrame(() => el.didYouKnow.classList.add("is-visible"));
+    window.clearTimeout(state.factHideTimer);
+    state.factHideTimer = window.setTimeout(() => hideDidYouKnow(true), 9000);
+  }
+
+  function hideDidYouKnow(reschedule = true) {
+    window.clearTimeout(state.factTimer);
+    window.clearTimeout(state.factHideTimer);
+    el.didYouKnow.classList.remove("is-visible");
+    window.setTimeout(() => {
+      if (!el.didYouKnow.classList.contains("is-visible")) el.didYouKnow.hidden = true;
+    }, 240);
+    if (reschedule && el.menuScreen.classList.contains("is-active")) scheduleDidYouKnow(18000);
+  }
+
   function resetToMenu({ inactivity = false } = {}) {
     stopIdleTimer();
     window.clearTimeout(state.completionTimer);
@@ -1030,6 +1109,10 @@
     state.ending = false;
     state.heat = 45;
     state.wrongAttempts = 0;
+    state.wrongIngredients = new Map();
+    state.heatMoves = 0;
+    state.lastHeatDirection = 0;
+    state.heatDirectionChanges = 0;
     state.recoveredHeat = false;
     state.sessionAchievements = new Set();
     state.sessionActive = false;
@@ -1042,7 +1125,8 @@
     el.sessionStatus.classList.remove("is-warning");
     el.qrcode.replaceChildren();
     el.secretAchievement.hidden = true;
-    el.outcomeIllustration.hidden = true;
+    el.completeScreen.classList.remove("is-failed");
+    scheduleDidYouKnow(inactivity ? 4500 : 6500);
 
     if (inactivity) {
       el.menuNotice.textContent = "La experiencia se reinició por inactividad. ¡Elegí un plato para volver a cocinar!";
@@ -1215,6 +1299,7 @@
   el.victoryForm.addEventListener("submit", personalizeVictory);
   el.playerName.addEventListener("input", () => el.playerName.setCustomValidity(""));
   el.toastClose.addEventListener("click", hideToast);
+  el.didYouKnowClose.addEventListener("click", () => hideDidYouKnow(true));
   el.soundToggle.addEventListener("click", toggleSound);
   el.fullscreenToggle.addEventListener("click", toggleFullscreenMode);
   el.scrollTopButton.addEventListener("click", scrollMainPageToTop);
