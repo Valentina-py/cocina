@@ -50,6 +50,7 @@
     recipeLibrary: document.querySelector("#recipe-library"),
     cookbookNav: document.querySelector("#cookbook-nav"),
     cookbookContent: document.querySelector("#cookbook-content"),
+    scrollTopButton: document.querySelector("#scroll-top"),
     yaguareteCursor: document.querySelector("#yaguarete-cursor")
   };
 
@@ -92,12 +93,15 @@
     { lead: 64, bass: 43 }, { lead: 67 }, { lead: 69 }, { lead: null }
   ];
 
+  let scrollButtonFrame = null;
+
   function activateScreen(target) {
     screens.forEach((screen) => {
       const active = screen === target;
       screen.hidden = !active;
       screen.classList.toggle("is-active", active);
     });
+    scheduleScrollTopButtonUpdate();
   }
 
   function recipe() {
@@ -314,6 +318,26 @@
         destination: audioState.effects
       });
     });
+  }
+
+  function updateScrollTopButton() {
+    scrollButtonFrame = null;
+    if (!el.scrollTopButton) return;
+    const menuIsActive = !el.menuScreen.hidden;
+    const distance = Math.max(window.scrollY, el.menuScreen.scrollTop);
+    el.scrollTopButton.hidden = !menuIsActive || distance < 520;
+  }
+
+  function scheduleScrollTopButtonUpdate() {
+    if (scrollButtonFrame) return;
+    scrollButtonFrame = window.requestAnimationFrame(updateScrollTopButton);
+  }
+
+  function scrollMainPageToTop() {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior = reducedMotion ? "auto" : "smooth";
+    window.scrollTo({ top: 0, left: 0, behavior });
+    el.menuScreen.scrollTo({ top: 0, left: 0, behavior });
   }
 
   function openFamily(familyId) {
@@ -783,7 +807,7 @@
     const button = event.target.closest("[data-ingredient]");
     if (!button || !state.recipeId) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    const scrollablePhone = window.matchMedia("(max-width: 699px), (pointer: coarse) and (max-height: 540px)").matches;
+    const scrollablePhone = window.matchMedia("(max-width: 699px), (max-width: 960px) and (max-height: 540px)").matches;
     if (scrollablePhone && event.pointerType !== "mouse") return;
 
     event.preventDefault();
@@ -900,19 +924,22 @@
   el.playAgain.addEventListener("click", () => resetToMenu());
   el.toastClose.addEventListener("click", hideToast);
   el.soundToggle.addEventListener("click", toggleSound);
+  el.scrollTopButton.addEventListener("click", scrollMainPageToTop);
+  window.addEventListener("scroll", scheduleScrollTopButtonUpdate, { passive: true });
+  el.menuScreen.addEventListener("scroll", scheduleScrollTopButtonUpdate, { passive: true });
 
-  document.addEventListener("pointerdown", startChiptune, { capture: true });
+  document.addEventListener("pointerdown", startChiptune, { capture: true, passive: true });
 
   document.addEventListener("contextmenu", (event) => event.preventDefault());
   document.addEventListener("dragstart", (event) => event.preventDefault());
   document.addEventListener("gesturestart", (event) => event.preventDefault());
-  document.addEventListener("touchmove", (event) => {
-    const standMode = window.matchMedia("(pointer: coarse) and (min-width: 700px) and (min-height: 541px)").matches;
-    const scrollableArea = event.target.closest?.(".menu-screen, .modal-card");
-    if (standMode && !scrollableArea) event.preventDefault();
-  }, { passive: false });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) noteActivity();
+    if (document.hidden) {
+      stopChiptune();
+    } else {
+      noteActivity();
+      if (audioState.enabled && audioState.context) startChiptune();
+    }
   });
 
   updateSoundButton();
