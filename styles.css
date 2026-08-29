@@ -488,10 +488,15 @@ main {
 }
 
 .ingredient-token.is-added {
-  opacity: 0.38;
-  background: rgba(73, 100, 72, 0.32);
-  filter: grayscale(0.5);
-  cursor: default;
+  opacity: 0.76;
+  border-color: rgba(152, 194, 123, 0.58);
+  background: rgba(73, 100, 72, 0.42);
+  cursor: pointer;
+}
+
+.ingredient-token.is-added small {
+  color: #e8f0d4;
+  font-weight: 800;
 }
 
 .ingredient-token.is-rejected {
@@ -694,7 +699,7 @@ main {
   overflow: hidden;
 }
 
-.added-chips span {
+.added-chips > button {
   max-width: 105px;
   padding: 4px 7px;
   overflow: hidden;
@@ -705,6 +710,19 @@ main {
   font-size: 8px;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.added-chips > button:hover,
+.added-chips > button:focus-visible {
+  border-color: #ffbc83;
+  background: rgba(126, 48, 31, 0.7);
+}
+
+.added-chips > button b {
+  margin-left: 3px;
+  color: #ffbc83;
+  font-size: 11px;
 }
 
 .progress-card {
@@ -1078,6 +1096,25 @@ main {
 .culture-toast.is-visible {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.culture-toast.is-error {
+  border-color: #ff9b76;
+  background: rgba(94, 29, 22, 0.98);
+}
+
+.culture-toast.is-error .toast-icon {
+  border-color: #ff9b76;
+  color: #ffb092;
+}
+
+.culture-toast.is-error strong {
+  color: #ffc0aa;
+}
+
+.culture-toast.is-discovery {
+  border-width: 3px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.4), 0 0 0 5px rgba(255, 215, 125, 0.12);
 }
 
 .toast-icon {

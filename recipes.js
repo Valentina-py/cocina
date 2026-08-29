@@ -54,6 +54,34 @@ window.KITCHEN_DATA = {
     }
   },
 
+  rejectionReasons: {
+    empanadas: {
+      queso: "Esta comanda trabaja una empanada regional de carne; el queso corresponde a otro tipo de relleno.",
+      choclo: "El choclo es protagonista de humitas y tamales, pero no forma parte del relleno de carne de esta comanda.",
+      poroto: "Los porotos pertenecen a preparaciones de olla, como el locro, y alterarían la textura de este relleno.",
+      carne: "La versión tucumana de esta experiencia usa matambre cortado a cuchillo para lograr su textura característica.",
+      pimenton: "Esta comanda tucumana concentra el sabor en matambre, verdeo y comino; el pimentón no está incluido en esta versión.",
+      default: "No figura en la comanda de esta versión regional; las recetas familiares pueden tener otras variantes."
+    },
+    humita: {
+      chorizo: "La humita obtiene su sabor y cremosidad del choclo y el zapallo; el chorizo pertenece a guisos como el locro.",
+      poroto: "El poroto aporta una textura propia de guisos, mientras esta humita busca una pasta suave de choclo.",
+      default: "No integra esta comanda de humita, centrada en productos del maíz y la huerta."
+    },
+    locro: {
+      queso: "En esta comanda el cuerpo del locro se logra con maíz, porotos y zapallo, sin necesidad de queso.",
+      leche: "El locro se espesa con zapallo y cocción lenta; la leche modificaría el carácter de este guiso.",
+      limon: "Esta versión se termina con condimentos y verdeo; el limón no forma parte de su perfil de cocción.",
+      default: "No pertenece a esta comanda de locro; buscá ingredientes pensados para una cocción larga en olla."
+    },
+    tamales: {
+      queso: "Esta comanda propone un tamal con relleno de carne; el queso corresponde a otra familia de rellenos.",
+      poroto: "El poroto funciona mejor en guisos de olla y no en la masa compacta que debe sostener la chala.",
+      leche: "La masa de esta versión se une con zapallo y grasa del relleno; la leche cambiaría su consistencia.",
+      default: "No figura en esta comanda de tamal envuelto; elegí ingredientes que puedan integrarse a la masa y al relleno."
+    }
+  },
+
   recipes: {
     empanada_saltena: {
       family: "empanadas",
@@ -62,13 +90,14 @@ window.KITCHEN_DATA = {
       emoji: "🥟",
       vessel: "board",
       required: ["carne", "papa", "cebolla", "huevo", "comino", "pimenton"],
-      pantry: ["carne", "papa", "cebolla", "huevo", "comino", "pimenton", "matambre", "limon", "aceituna", "pasas", "azucar", "verdeo"],
+      optional: [],
+      pantry: ["carne", "papa", "cebolla", "huevo", "comino", "pimenton", "matambre", "limon", "aceituna", "pasas", "azucar", "queso"],
       description: "Pequeña, jugosa y especiada, con carne cortada a cuchillo y papa.",
       culture: "En Salta suele cocinarse al horno de barro y se reconoce por su tamaño pequeño y su relleno jugoso.",
       achievement: "Guardiana/o del Repulgue Salteño",
       variations: [
         {
-          anyOf: ["matambre", "limon"],
+          anyOf: ["matambre", "limon", "verdeo"],
           target: "empanada_tucumana",
           message: "La combinación de matambre y limón nos lleva a Tucumán, donde la empanada se celebra con 13 repulgues."
         },
@@ -87,7 +116,8 @@ window.KITCHEN_DATA = {
       emoji: "🥟",
       vessel: "board",
       required: ["matambre", "cebolla", "verdeo", "huevo", "comino", "limon"],
-      pantry: ["matambre", "cebolla", "verdeo", "huevo", "comino", "limon", "papa", "aceituna", "pasas", "azucar", "carne", "pimenton"],
+      optional: [],
+      pantry: ["matambre", "cebolla", "verdeo", "huevo", "comino", "limon", "papa", "aceituna", "pasas", "azucar", "carne", "queso"],
       description: "Jugosa, con matambre, verdeo y el toque fresco del limón al servir.",
       culture: "La tucumana se distingue por sus 13 repulgues y por la Fiesta Nacional de la Empanada de Famaillá.",
       achievement: "Maestra/o de los Trece Repulgues",
@@ -112,7 +142,8 @@ window.KITCHEN_DATA = {
       emoji: "🥟",
       vessel: "board",
       required: ["carne", "papa", "cebolla", "huevo", "pasas", "azucar"],
-      pantry: ["carne", "papa", "cebolla", "huevo", "pasas", "azucar", "aceituna", "matambre", "limon", "comino", "pimenton", "verdeo"],
+      optional: ["aceituna"],
+      pantry: ["carne", "papa", "cebolla", "huevo", "pasas", "azucar", "aceituna", "matambre", "limon", "queso", "choclo", "poroto"],
       description: "Una versión agridulce con papa, pasas y azúcar sobre la masa.",
       culture: "Su contraste entre carne, pasas y azúcar recuerda herencias de la cocina colonial.",
       achievement: "Alquimista del Sabor Agridulce",
@@ -132,7 +163,8 @@ window.KITCHEN_DATA = {
       emoji: "🌽",
       vessel: "pot",
       required: ["choclo", "zapallo", "cebolla", "morron", "albahaca", "pimenton"],
-      pantry: ["choclo", "zapallo", "cebolla", "morron", "albahaca", "pimenton", "queso", "leche", "chala", "comino", "tomate", "aji"],
+      optional: ["queso", "leche", "comino"],
+      pantry: ["choclo", "zapallo", "cebolla", "morron", "albahaca", "pimenton", "queso", "leche", "chala", "comino", "chorizo", "poroto"],
       description: "Cremosa y suave, nacida de la mezcla de choclo rallado y zapallo.",
       culture: "La humita es de raíz prehispánica. En olla se cocina lentamente hasta lograr una textura espesa y sedosa.",
       achievement: "Maestra/o del Choclo y la Pacha",
@@ -152,7 +184,8 @@ window.KITCHEN_DATA = {
       emoji: "🌽",
       vessel: "bowl",
       required: ["choclo", "zapallo", "cebolla", "queso", "albahaca", "chala"],
-      pantry: ["choclo", "zapallo", "cebolla", "queso", "albahaca", "chala", "morron", "pimenton", "leche", "comino", "tomate", "aji"],
+      optional: ["morron", "pimenton", "comino"],
+      pantry: ["choclo", "zapallo", "cebolla", "queso", "albahaca", "chala", "morron", "pimenton", "leche", "comino", "chorizo", "poroto"],
       description: "Pasta de choclo con corazón de queso, envuelta y atada en chalas.",
       culture: "Las chalas se cruzan, se rellenan y se atan para formar un paquete que luego se hierve.",
       achievement: "Tejedora/or de Chalas Andinas",
@@ -172,7 +205,8 @@ window.KITCHEN_DATA = {
       emoji: "🥘",
       vessel: "pot",
       required: ["maiz_blanco", "poroto", "zapallo", "panceta", "chorizo", "cebolla", "pimenton"],
-      pantry: ["maiz_blanco", "poroto", "zapallo", "panceta", "chorizo", "cebolla", "pimenton", "charqui", "papa", "comino", "aji", "verdeo"],
+      optional: ["papa", "aji"],
+      pantry: ["maiz_blanco", "poroto", "zapallo", "panceta", "chorizo", "cebolla", "pimenton", "charqui", "papa", "aji", "queso", "leche"],
       description: "Guiso comunitario de maíz blanco, porotos, zapallo y carnes.",
       culture: "De origen prehispánico, el locro cambió con los siglos y hoy reúne a familias y comunidades alrededor de la olla.",
       achievement: "Maestra/o del Fuego Comunitario",
@@ -192,7 +226,8 @@ window.KITCHEN_DATA = {
       emoji: "🥘",
       vessel: "pot",
       required: ["maiz_blanco", "poroto", "zapallo", "charqui", "papa", "cebolla", "pimenton"],
-      pantry: ["maiz_blanco", "poroto", "zapallo", "charqui", "papa", "cebolla", "pimenton", "panceta", "chorizo", "comino", "aji", "verdeo"],
+      optional: ["comino", "aji", "verdeo"],
+      pantry: ["maiz_blanco", "poroto", "zapallo", "charqui", "papa", "cebolla", "pimenton", "comino", "aji", "verdeo", "queso", "leche"],
       description: "Una lectura de altura con maíz, papa y charqui secado al aire.",
       culture: "El charqui fue una forma ancestral de conservar carne y transportarla por los caminos andinos.",
       achievement: "Guardiana/o de los Sabores de Altura",
@@ -206,7 +241,8 @@ window.KITCHEN_DATA = {
       emoji: "🫔",
       vessel: "bowl",
       required: ["harina_maiz", "zapallo", "cerdo", "cebolla", "huevo", "pimenton", "chala"],
-      pantry: ["harina_maiz", "zapallo", "cerdo", "cebolla", "huevo", "pimenton", "chala", "pasas", "comino", "aji", "verdeo", "queso"],
+      optional: ["comino", "aji"],
+      pantry: ["harina_maiz", "zapallo", "cerdo", "cebolla", "huevo", "pimenton", "chala", "pasas", "comino", "aji", "queso", "poroto"],
       description: "Masa de maíz y zapallo, rellena, envuelta en chala y hervida.",
       culture: "Tamal significa “envuelto”. Cada familia guarda una proporción, un condimento y una forma de atarlo.",
       achievement: "Maestra/o del Envoltorio Ancestral",
@@ -226,7 +262,8 @@ window.KITCHEN_DATA = {
       emoji: "🫔",
       vessel: "bowl",
       required: ["harina_maiz", "zapallo", "cerdo", "cebolla", "huevo", "pasas", "chala"],
-      pantry: ["harina_maiz", "zapallo", "cerdo", "cebolla", "huevo", "pasas", "chala", "pimenton", "comino", "aji", "verdeo", "queso"],
+      optional: ["pimenton", "comino", "aji"],
+      pantry: ["harina_maiz", "zapallo", "cerdo", "cebolla", "huevo", "pasas", "chala", "pimenton", "comino", "aji", "queso", "poroto"],
       description: "Masa de maíz con relleno de cerdo y el contrapunto dulce de las pasas.",
       culture: "Los tamales admiten variaciones de casa en casa: cerdo, huevo, ají y pasas aparecen en distintas combinaciones.",
       achievement: "Custodia/o de las Recetas Familiares",

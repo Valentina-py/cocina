@@ -49,6 +49,7 @@
   const state = {
     recipeId: null,
     added: new Set(),
+    variationHistory: [],
     drag: null,
     idleDeadline: 0,
     idleTimer: null,
@@ -121,6 +122,7 @@
     closeFamily();
     state.recipeId = recipeId;
     state.added = new Set();
+    state.variationHistory = [];
     state.completed = false;
     state.sessionActive = true;
     el.menuNotice.hidden = true;
@@ -158,9 +160,9 @@
       button.type = "button";
       button.className = `ingredient-token ingredient-token--${item.tone}${added ? " is-added" : ""}`;
       button.dataset.ingredient = id;
-      button.disabled = added;
-      button.setAttribute("aria-label", added ? `${item.name}, ya agregado` : `Agregar ${item.name}`);
-      button.innerHTML = `<span aria-hidden="true">${item.icon}</span><strong>${item.name}</strong><small>${added ? "Agregado ✓" : "Tocar o mover"}</small>`;
+      button.setAttribute("aria-pressed", String(added));
+      button.setAttribute("aria-label", added ? `Quitar ${item.name}` : `Agregar ${item.name}`);
+      button.innerHTML = `<span aria-hidden="true">${item.icon}</span><strong>${item.name}</strong><small>${added ? "Tocar para quitar ↶" : "Tocar o mover"}</small>`;
       el.ingredientGrid.append(button);
     });
   }
@@ -180,7 +182,7 @@
   function renderVessel(current) {
     el.vessel.className = `vessel vessel--${current.vessel}`;
     el.dropZone.dataset.vessel = current.vessel;
-    el.dropInstruction.textContent = state.added.size ? "¡Seguí así! Elegí otro ingrediente" : "Soltá aquí los ingredientes";
+    el.dropInstruction.textContent = state.added.size ? "Tocá de nuevo un ingrediente para quitarlo" : "Soltá aquí los ingredientes";
     el.vesselContent.replaceChildren();
     el.addedChips.replaceChildren();
 
@@ -193,8 +195,11 @@
       piece.style.setProperty("--piece-index", index);
       el.vesselContent.append(piece);
 
-      const chip = document.createElement("span");
-      chip.textContent = `${item.icon} ${item.name}`;
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.dataset.removeIngredient = id;
+      chip.setAttribute("aria-label", `Quitar ${item.name} de la preparación`);
+      chip.innerHTML = `<span aria-hidden="true">${item.icon}</span> ${item.name} <b aria-hidden="true">×</b>`;
       el.addedChips.append(chip);
     });
   }
@@ -214,8 +219,9 @@
     const current = recipe();
     const variation = current.variations.find((rule) => rule.anyOf.includes(id));
     const belongsToRecipe = current.required.includes(id);
+    const isOptional = (current.optional || []).includes(id);
 
-    if (!belongsToRecipe && !variation) {
+    if (!belongsToRecipe && !isOptional && !variation) {
       rejectIngredient(id, current);
       return;
     }
@@ -232,12 +238,46 @@
     }
   }
 
+  function toggleIngredient(id) {
+    if (state.added.has(id)) {
+      removeIngredient(id);
+    } else {
+      addIngredient(id);
+    }
+  }
+
+  function removeIngredient(id) {
+    if (!state.recipeId || state.completed || !state.added.has(id)) return;
+
+    noteActivity();
+    window.clearTimeout(state.completionTimer);
+    state.added.delete(id);
+
+    const lastVariation = state.variationHistory.at(-1);
+    if (lastVariation?.trigger === id && lastVariation.to === state.recipeId) {
+      const replacementTrigger = lastVariation.anyOf.find((candidate) => state.added.has(candidate));
+      if (replacementTrigger) {
+        lastVariation.trigger = replacementTrigger;
+      } else {
+        state.recipeId = lastVariation.from;
+        state.variationHistory.pop();
+        el.toastTitle.textContent = `Volviste a ${recipe().name}`;
+        el.toastMessage.textContent = `Quitaste ${ingredient(id).name.toLowerCase()}, que había provocado el cambio regional. La comanda recuperó la versión anterior.`;
+        showToast(7000, "info");
+      }
+    }
+
+    renderGame();
+  }
+
   function rejectIngredient(id, current) {
     const rejected = ingredient(id);
     const token = el.ingredientGrid.querySelector(`[data-ingredient="${id}"]`);
+    const familyReasons = DATA.rejectionReasons[current.family] || {};
+    const explanation = familyReasons[id] || familyReasons.default || "No figura en la comanda de esta versión.";
 
     el.toastTitle.textContent = "Ese ingrediente no va en esta receta";
-    el.toastMessage.textContent = `${rejected.name} no forma parte de ${current.name}. Mirá la comanda y probá con otro ingrediente; no perdiste ningún avance.`;
+    el.toastMessage.textContent = `${rejected.name} marca error en ${current.name}. ${explanation} No perdiste ningún avance.`;
     el.dropZone.classList.remove("is-rejected");
     token?.classList.remove("is-rejected");
     void el.dropZone.offsetWidth;
@@ -247,11 +287,17 @@
       el.dropZone.classList.remove("is-rejected");
       token?.classList.remove("is-rejected");
     }, 720);
-    showToast();
+    showToast(9000, "error");
   }
 
   function transformRecipe(variation, triggerId) {
     const trigger = ingredient(triggerId);
+    state.variationHistory.push({
+      from: state.recipeId,
+      to: variation.target,
+      trigger: triggerId,
+      anyOf: [...variation.anyOf]
+    });
     state.recipeId = variation.target;
     renderGame();
 
@@ -261,7 +307,7 @@
     const transformed = recipe();
     el.toastTitle.textContent = `¡Ahora es ${transformed.name}!`;
     el.toastMessage.textContent = `Le agregaste ${trigger.name.toLowerCase()}. Tu preparación acaba de transformarse. ${variation.message}`;
-    showToast();
+    showToast(12000, "discovery");
   }
 
   function spawnIngredientBurst(id) {
@@ -333,11 +379,14 @@
     }
   }
 
-  function showToast() {
+  function showToast(durationMs = 6500, type = "info") {
     window.clearTimeout(state.toastTimer);
+    el.cultureToast.classList.remove("is-error", "is-discovery");
+    if (type === "error") el.cultureToast.classList.add("is-error");
+    if (type === "discovery") el.cultureToast.classList.add("is-discovery");
     el.cultureToast.hidden = false;
     requestAnimationFrame(() => el.cultureToast.classList.add("is-visible"));
-    state.toastTimer = window.setTimeout(hideToast, 6500);
+    state.toastTimer = window.setTimeout(hideToast, durationMs);
   }
 
   function hideToast() {
@@ -358,6 +407,7 @@
 
     state.recipeId = null;
     state.added = new Set();
+    state.variationHistory = [];
     state.completed = false;
     state.sessionActive = false;
 
@@ -407,7 +457,7 @@
 
   function beginDrag(event) {
     const button = event.target.closest("[data-ingredient]");
-    if (!button || button.disabled || !state.recipeId) return;
+    if (!button || !state.recipeId) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
 
     event.preventDefault();
@@ -453,7 +503,7 @@
     const isDrop = pointInDropZone(event.clientX, event.clientY);
     state.suppressClickUntil = Date.now() + 500;
     cancelDrag();
-    if (isTap || isDrop) addIngredient(id);
+    if (isTap || isDrop) toggleIngredient(id);
   }
 
   function cancelDrag() {
@@ -492,7 +542,12 @@
   el.ingredientGrid.addEventListener("click", (event) => {
     if (Date.now() < state.suppressClickUntil) return;
     const button = event.target.closest("[data-ingredient]");
-    if (button && event.detail === 0) addIngredient(button.dataset.ingredient);
+    if (button && event.detail === 0) toggleIngredient(button.dataset.ingredient);
+  });
+
+  el.addedChips.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-remove-ingredient]");
+    if (chip) removeIngredient(chip.dataset.removeIngredient);
   });
 
   document.addEventListener("pointermove", moveDrag, { passive: false });
