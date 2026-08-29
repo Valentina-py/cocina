@@ -44,11 +44,9 @@
     playAgain: document.querySelector("#play-again"),
     qrcode: document.querySelector("#qrcode"),
     recipeLink: document.querySelector("#recipe-link"),
-    openRecipeGuide: document.querySelector("#open-recipe-guide"),
-    recipeGuide: document.querySelector("#recipe-guide"),
-    closeRecipeGuide: document.querySelector("#close-recipe-guide"),
-    guideTabs: document.querySelector("#guide-tabs"),
-    guideContent: document.querySelector("#guide-content")
+    recipeLibrary: document.querySelector("#recipe-library"),
+    cookbookNav: document.querySelector("#cookbook-nav"),
+    cookbookContent: document.querySelector("#cookbook-content")
   };
 
   const state = {
@@ -63,8 +61,7 @@
     toastTimer: null,
     sessionActive: false,
     suppressClickUntil: 0,
-    completed: false,
-    guideId: "empanadas"
+    completed: false
   };
 
   function activateScreen(target) {
@@ -123,75 +120,76 @@
     }
   }
 
-  function openRecipeGuide(guideId = state.guideId) {
-    if (!DATA.recipeGuides[guideId]) guideId = "empanadas";
-    state.guideId = guideId;
-    renderRecipeGuide();
-    el.recipeGuide.hidden = false;
-    requestAnimationFrame(() => el.recipeGuide.classList.add("is-open"));
-    state.sessionActive = true;
-    armIdleTimer(120000);
-    requestAnimationFrame(() => el.closeRecipeGuide.focus());
-  }
+  function renderCookbook() {
+    const chapters = DATA.cookbookChapters;
+    el.cookbookNav.replaceChildren();
+    el.cookbookContent.replaceChildren();
 
-  function closeRecipeGuide() {
-    el.recipeGuide.classList.remove("is-open");
-    window.setTimeout(() => {
-      if (!el.recipeGuide.classList.contains("is-open")) el.recipeGuide.hidden = true;
-    }, 220);
+    Object.values(chapters).forEach((chapter) => {
+      const navButton = document.createElement("button");
+      navButton.type = "button";
+      navButton.className = "cookbook-nav-button";
+      navButton.dataset.cookbookTarget = chapter.anchor;
+      navButton.innerHTML = `<span aria-hidden="true">${chapter.emoji}</span><strong>${chapter.name}</strong>`;
+      el.cookbookNav.append(navButton);
 
-    if (!state.recipeId) {
-      state.sessionActive = false;
-      stopIdleTimer();
-      el.idleIndicator.hidden = true;
-    }
-  }
+      const metadata = chapter.meta.map((item) => `
+        <div><small>${item.label}</small><strong>${item.value}</strong></div>`).join("");
 
-  function renderRecipeGuide() {
-    const guides = DATA.recipeGuides;
-    const current = guides[state.guideId];
-    if (!current) return;
+      const ingredientGroups = chapter.ingredientGroups.map((group) => `
+        <section class="cookbook-ingredient-group">
+          <h4>${group.title}</h4>
+          <ul>${group.items.map((item) => `<li>${item}</li>`).join("")}</ul>
+        </section>`).join("");
 
-    el.guideTabs.replaceChildren();
-    Object.entries(guides).forEach(([id, guide]) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "guide-tab";
-      button.dataset.guide = id;
-      button.setAttribute("role", "tab");
-      button.setAttribute("aria-selected", String(id === state.guideId));
-      button.innerHTML = `<span aria-hidden="true">${guide.emoji}</span><strong>${guide.name}</strong>`;
-      el.guideTabs.append(button);
+      const variations = chapter.variations.map((variation) => `
+        <section class="cookbook-variation">
+          <div><strong>${variation.name}</strong><small>${variation.place}</small></div>
+          <p>${variation.detail}</p>
+        </section>`).join("");
+
+      const steps = chapter.steps.map((step) => `
+        <li>
+          <div class="cookbook-step-heading"><strong>${step.title}</strong><time>${step.time}</time></div>
+          <p>${step.detail}</p>
+          <aside><span aria-hidden="true">💡</span><strong>Consejo de cocina:</strong> ${step.tip}</aside>
+        </li>`).join("");
+
+      const article = document.createElement("article");
+      article.id = chapter.anchor;
+      article.className = "cookbook-chapter";
+      article.innerHTML = `
+        <header class="cookbook-chapter-header">
+          <span class="cookbook-chapter-emoji" aria-hidden="true">${chapter.emoji}</span>
+          <div><p class="eyebrow">${chapter.region}</p><h3>${chapter.name}</h3><p>${chapter.introduction}</p></div>
+        </header>
+        <div class="cookbook-meta">${metadata}</div>
+        <section class="cookbook-variations-block">
+          <h4 class="cookbook-heading"><span aria-hidden="true">◆</span> Variaciones regionales</h4>
+          <div class="cookbook-variations">${variations}</div>
+        </section>
+        <div class="cookbook-spread">
+          <aside class="cookbook-pantry-page">
+            <h4 class="cookbook-heading"><span aria-hidden="true">◆</span> Ingredientes y condimentos</h4>
+            ${ingredientGroups}
+            <section class="cookbook-equipment">
+              <h4>Utensilios recomendados</h4>
+              <ul>${chapter.equipment.map((item) => `<li>${item}</li>`).join("")}</ul>
+            </section>
+          </aside>
+          <section class="cookbook-tutorial">
+            <h4 class="cookbook-heading"><span aria-hidden="true">◆</span> Tutorial paso a paso</h4>
+            <ol class="cookbook-steps">${steps}</ol>
+          </section>
+        </div>
+        <footer class="cookbook-finish">
+          <section><span aria-hidden="true">🍽️</span><div><strong>Cómo servir</strong><p>${chapter.serving}</p></div></section>
+          <section><span aria-hidden="true">❄️</span><div><strong>Conservación</strong><p>${chapter.storage}</p></div></section>
+          <section><span aria-hidden="true">🧼</span><div><strong>Cocina segura</strong><p>${chapter.safety}</p></div></section>
+        </footer>
+        <button class="cookbook-back" type="button" data-cookbook-top>↑ Volver al índice del recetario</button>`;
+      el.cookbookContent.append(article);
     });
-
-    const variations = current.variations.map((variation) => `
-      <section class="guide-variation">
-        <strong>${variation.name}</strong>
-        <small>${variation.place}</small>
-        <p>${variation.detail}</p>
-      </section>`).join("");
-
-    const steps = current.steps.map((step) => `<li>${step}</li>`).join("");
-
-    el.guideContent.innerHTML = `
-      <div class="guide-hero">
-        <span class="guide-hero-emoji" aria-hidden="true">${current.emoji}</span>
-        <div><h3>${current.name}</h3><span class="guide-region">${current.region}</span></div>
-      </div>
-      <p class="guide-introduction">${current.introduction}</p>
-      <div class="guide-columns">
-        <section>
-          <h4 class="guide-section-title"><span aria-hidden="true">◆</span> Variaciones regionales</h4>
-          <div class="guide-variations">${variations}</div>
-        </section>
-        <section>
-          <h4 class="guide-section-title"><span aria-hidden="true">◆</span> Preparación</h4>
-          <ol class="guide-steps">${steps}</ol>
-        </section>
-      </div>
-      <p class="guide-note"><span aria-hidden="true">✦</span>${current.note}</p>`;
-
-    el.guideContent.scrollTop = 0;
   }
 
   function startRecipe(recipeId) {
@@ -482,7 +480,6 @@
     cancelDrag();
     hideToast();
     closeFamily();
-    closeRecipeGuide();
 
     state.recipeId = null;
     state.added = new Set();
@@ -491,6 +488,7 @@
     state.sessionActive = false;
 
     activateScreen(el.menuScreen);
+    el.menuScreen.scrollTop = 0;
     el.statusText.textContent = "Elegí una receta para comenzar";
     el.idleIndicator.hidden = true;
     el.sessionStatus.classList.remove("is-warning");
@@ -618,17 +616,14 @@
     if (event.target.closest("[data-close-modal]")) closeFamily();
   });
 
-  el.openRecipeGuide.addEventListener("click", () => openRecipeGuide());
-  el.closeRecipeGuide.addEventListener("click", closeRecipeGuide);
-  el.recipeGuide.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close-guide]")) closeRecipeGuide();
+  el.cookbookNav.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-cookbook-target]");
+    if (!button) return;
+    document.getElementById(button.dataset.cookbookTarget)?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  el.guideTabs.addEventListener("click", (event) => {
-    const tab = event.target.closest("[data-guide]");
-    if (!tab) return;
-    state.guideId = tab.dataset.guide;
-    renderRecipeGuide();
-    noteActivity();
+  el.cookbookContent.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-cookbook-top]")) return;
+    el.recipeLibrary.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
   el.ingredientGrid.addEventListener("pointerdown", beginDrag);
@@ -649,8 +644,7 @@
   document.addEventListener("pointerdown", noteActivity, { capture: true });
   document.addEventListener("keydown", (event) => {
     noteActivity();
-    if (event.key === "Escape" && !el.recipeGuide.hidden) closeRecipeGuide();
-    else if (event.key === "Escape" && !el.variantDialog.hidden) closeFamily();
+    if (event.key === "Escape" && !el.variantDialog.hidden) closeFamily();
   });
 
   el.homeButton.addEventListener("click", () => resetToMenu());
@@ -662,12 +656,13 @@
   document.addEventListener("gesturestart", (event) => event.preventDefault());
   document.addEventListener("touchmove", (event) => {
     const standMode = window.matchMedia("(pointer: coarse) and (min-width: 700px)").matches;
-    const guideIsScrolling = event.target.closest?.(".guide-content");
-    if (standMode && !guideIsScrolling) event.preventDefault();
+    const menuIsScrolling = event.target.closest?.(".menu-screen");
+    if (standMode && !menuIsScrolling) event.preventDefault();
   }, { passive: false });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) noteActivity();
   });
 
+  renderCookbook();
   resetToMenu();
 })();

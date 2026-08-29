@@ -82,75 +82,155 @@ window.KITCHEN_DATA = {
     }
   },
 
-  recipeGuides: {
+  cookbookChapters: {
     empanadas: {
+      anchor: "receta-empanadas",
       name: "Empanadas regionales",
       emoji: "🥟",
       region: "Salta · Tucumán · Córdoba",
-      introduction: "La empanada recorre la Argentina con rellenos, tamaños y repulgues propios. En el NOA, la carne cortada a cuchillo y el horno de barro ocupan un lugar central.",
+      introduction: "Una masa fina guarda un relleno jugoso cuya identidad cambia de provincia en provincia. Esta receta maestra parte de la versión salteña y explica cómo llevarla hacia la tucumana o la cordobesa.",
+      meta: [
+        { label: "Rinde", value: "18 empanadas" },
+        { label: "Preparación", value: "45 minutos" },
+        { label: "Reposo", value: "2 horas" },
+        { label: "Cocción", value: "12–15 minutos" },
+        { label: "Dificultad", value: "Intermedia" }
+      ],
+      equipment: ["Cuchillo bien afilado", "Tabla separada para carne", "Cacerola amplia", "Bandeja para enfriar", "Placa de horno", "Pincel de cocina"],
+      ingredientGroups: [
+        { title: "Relleno salteño", items: ["700 g de carne vacuna magra cortada a cuchillo", "450 g de cebolla picada", "300 g de papa en cubos de 5 mm", "3 huevos duros picados", "2 cucharadas de grasa vacuna o aceite", "2 cebollas de verdeo, parte verde, para terminar"] },
+        { title: "Masa y armado", items: ["18 tapas criollas para horno de 12–13 cm", "1 huevo batido para pintar", "Harina extra para la mesa", "Agua apenas tibia para humedecer los bordes"] },
+        { title: "Condimentos", items: ["1½ cucharaditas de pimentón dulce", "1 cucharadita de comino molido", "½ cucharadita de ají molido", "Sal fina y pimienta negra", "Opcional: una pizca de orégano seco"] }
+      ],
       variations: [
-        { name: "Salteña", place: "Salta", detail: "Pequeña y jugosa, con carne, papa, huevo, comino y pimentón." },
-        { name: "Tucumana", place: "Tucumán", detail: "Lleva matambre, verdeo y huevo; se reconoce por sus 13 repulgues y suele acompañarse con limón." },
-        { name: "Cordobesa", place: "Córdoba", detail: "Combina carne, papa y huevo con el contrapunto dulce de las pasas y el azúcar." }
+        { name: "Salteña", place: "Salta", detail: "Conservá la papa, la carne cortada a cuchillo y el perfil especiado. Se busca una empanada pequeña, jugosa y de masa firme." },
+        { name: "Tucumana", place: "Tucumán", detail: "Reemplazá la carne por 750 g de matambre hervido y cortado; quitá la papa, aumentá el verdeo y serví con gajos de limón. Cerrá con 13 repulgues." },
+        { name: "Cordobesa", place: "Córdoba", detail: "Sumá 70 g de pasas hidratadas, aceitunas picadas y una pizca de azúcar al relleno; espolvoreá muy levemente la tapa antes de hornear." }
       ],
       steps: [
-        "Cortar la carne y las verduras; cocinar el relleno con los condimentos de la variante elegida.",
-        "Dejar enfriar completamente para conservar los jugos y evitar que la masa se humedezca.",
-        "Colocar el relleno sobre los discos, cerrar y realizar el repulgue característico.",
-        "Cocinar en horno fuerte —tradicionalmente de barro— hasta que la masa quede dorada."
+        { title: "Organizar y enfriar", time: "10 min", detail: "Separá los utensilios para carne y vegetales. Mantené la carne fría hasta cortarla: así se logran cubos limpios de aproximadamente 5 mm.", tip: "No piques la carne como pasta; los pequeños cubos conservan mejor textura y jugo." },
+        { title: "Blanquear la papa", time: "5 min", detail: "Herví los cubitos en agua con sal durante 3 a 4 minutos. Deben quedar apenas tiernos, todavía firmes. Colá y extendé para cortar la cocción.", tip: "Si la papa se cocina de más, se desarma al mezclar el relleno." },
+        { title: "Construir la base", time: "12 min", detail: "Calentá la grasa a fuego medio. Cociná la cebolla con una pizca de sal hasta que esté transparente, sin dorarla en exceso. Añadí pimentón, comino y ají fuera del fuego durante 20 segundos.", tip: "Las especias se queman rápido; el calor residual alcanza para despertar su aroma." },
+        { title: "Sellar la carne", time: "6 min", detail: "Volvé al fuego fuerte, incorporá la carne y mezclá solo hasta que cambie de color por fuera. Retirá aunque el centro aún esté rosado: terminará de cocinarse en el horno.", tip: "Una cocción breve evita un relleno seco." },
+        { title: "Enfriar y madurar", time: "2 h", detail: "Mezclá la papa, corregí sal y pimienta y extendé el relleno en una bandeja. Cuando esté frío, tapá y llevá a heladera. Al final agregá huevo duro y verdeo.", tip: "El relleno frío protege la masa y permite un repulgue limpio." },
+        { title: "Rellenar", time: "15 min", detail: "Colocá 1½ cucharadas en el centro de cada disco. Dejá un borde libre de 1,5 cm; humedecelo apenas, cerrá expulsando aire y presioná sin aplastar el relleno.", tip: "Demasiado relleno abre la empanada durante la cocción." },
+        { title: "Repulgar y pintar", time: "10 min", detail: "Formá el repulgue de la variante elegida. Acomodá con la unión hacia arriba sobre placa fría y pincelá una capa fina de huevo batido.", tip: "Mantené las empanadas armadas en frío mientras el horno termina de calentarse." },
+        { title: "Hornear fuerte", time: "12–15 min", detail: "Calentá el horno a 230 °C. Horneá hasta que la base esté firme y la superficie dorada. Esperá 3 minutos antes de servir: el interior conserva mucho calor.", tip: "Una placa precalentada ayuda a obtener una base más crocante." }
       ],
-      note: "Cada familia guarda proporciones y secretos propios: la guía presenta rasgos reconocibles, no una única receta posible."
+      serving: "Serví calientes, no recién salidas del horno. Para una mesa regional, acompañá con salsa de ají suave y gajos de limón para la versión tucumana.",
+      storage: "El relleno cocido se conserva hasta 48 horas refrigerado. Las empanadas armadas pueden congelarse separadas; hornealas sin descongelar agregando unos minutos.",
+      safety: "Enfriá el relleno rápidamente en una fuente baja y evitá dejar carne cocida a temperatura ambiente por períodos prolongados."
     },
     humita: {
-      name: "Humita",
+      anchor: "receta-humita",
+      name: "Humita: en olla y en chala",
       emoji: "🌽",
       region: "Salta · Jujuy · Tucumán",
-      introduction: "De raíz prehispánica, la humita transforma choclo rallado y zapallo en una preparación espesa y suave, aromatizada con productos de la huerta.",
+      introduction: "El choclo fresco y el zapallo forman una crema de raíz prehispánica. La misma preparación puede servirse en plato o convertirse en paquetes envueltos en chala.",
+      meta: [
+        { label: "Rinde", value: "10–12 porciones" },
+        { label: "Preparación", value: "50 minutos" },
+        { label: "Cocción en olla", value: "25–35 minutos" },
+        { label: "Cocción en chala", value: "50–60 minutos" },
+        { label: "Dificultad", value: "Intermedia" }
+      ],
+      equipment: ["Rallador grueso o procesadora", "Cacerola de fondo pesado", "Sartén", "Cuchara de madera", "Olla alta para hervir", "Hilo de algodón si faltan tiras de chala"],
+      ingredientGroups: [
+        { title: "Base de choclo", items: ["12 choclos frescos con sus chalas", "500 g de zapallo amarillo rallado", "200–250 ml de leche", "250 g de queso criollo o cremoso en cubos", "2 cucharadas de aceite de maíz o girasol"] },
+        { title: "Sofrito", items: ["2 cebollas medianas picadas finas", "1 pimiento rojo pequeño", "1 tomate maduro sin semillas, opcional", "1 cucharada de albahaca fresca picada"] },
+        { title: "Condimentos", items: ["1 cucharadita de pimentón dulce", "½ cucharadita de comino", "Ají molido a gusto", "Sal y pimienta negra"] }
+      ],
       variations: [
-        { name: "En olla", place: "NOA", detail: "Se cocina y se sirve cremosa en plato, con cebolla, morrón, albahaca y especias." },
-        { name: "En chala", place: "Región andina", detail: "La pasta se envuelve entre dos chalas cruzadas, se ata y se cocina como un pequeño paquete." }
+        { name: "Humita en olla", place: "NOA", detail: "Se sirve cremosa en cazuela. Reservá parte de la leche para ajustar la textura al final y añadí el queso poco antes de servir." },
+        { name: "Humita en chala", place: "Región andina", detail: "Usá una pasta algo más firme. Cruzá dos chalas, rellená, cerrá bien y herví los paquetes hasta que la hoja cambie de color." }
       ],
       steps: [
-        "Rallar o procesar los granos de choclo y combinar con zapallo cocido o rallado.",
-        "Rehogar cebolla y morrón; sumar la pasta y cocinar lentamente, revolviendo para que no se pegue.",
-        "Para servir en olla, ajustar la cremosidad y terminar con albahaca, queso o ají según la receta familiar.",
-        "Para hacerla en chala, colocar la pasta en hojas cruzadas, cerrar, atar y hervir en agua con sal."
+        { title: "Elegir y guardar las chalas", time: "10 min", detail: "Pelá los choclos sin romper las hojas. Separá las chalas interiores más anchas y flexibles; lavalas con cuidado y reservá algunas para cortar tiras de atado.", tip: "Dos hojas grandes por paquete facilitan un cierre seguro." },
+        { title: "Rallar el choclo", time: "20 min", detail: "Rallá los granos sobre un recipiente profundo, aprovechando la leche natural del choclo. También podés procesar por pulsos, sin convertirlo en líquido.", tip: "Un choclo tierno y lechoso necesita menos leche agregada." },
+        { title: "Preparar el sofrito", time: "12 min", detail: "Calentá el aceite y cociná cebolla y pimiento a fuego bajo hasta que estén suaves. Agregá pimentón, comino y ají al final para que no se quemen.", tip: "El sofrito debe quedar dulce y húmedo, no tostado." },
+        { title: "Cocinar la crema", time: "25–35 min", detail: "Incorporá choclo y zapallo. Cociná a fuego bajo y revolvé, raspando fondo y esquinas. Sumá leche de a poco hasta lograr una crema espesa que se desprenda lentamente de la cuchara.", tip: "Si salpica o se pega, bajá el fuego y agregá un pequeño chorro de leche caliente." },
+        { title: "Condimentar y terminar", time: "5 min", detail: "Probá y corregí sal, pimienta y picante. Apagá el fuego, añadí albahaca y parte del queso. Para servir en olla, dejá reposar 5 minutos y terminá con más queso.", tip: "La albahaca conserva mejor su perfume cuando entra fuera del fuego." },
+        { title: "Acondicionar las hojas", time: "8 min", detail: "Para humita en chala, pasá las hojas por agua muy caliente hasta que sean flexibles. Escurrí, secá y colocá dos en cruz, con las partes anchas superpuestas.", tip: "No las hiervas demasiado: se vuelven frágiles y difíciles de atar." },
+        { title: "Rellenar y atar", time: "20 min", detail: "Poné 3 cucharadas de pasta firme y un cubo de queso en el centro. Cerrá primero los laterales, luego las puntas, y sujetá el paquete con una tira de chala.", tip: "Dejá espacio para que la preparación se expanda durante la cocción." },
+        { title: "Hervir los paquetes", time: "50–60 min", detail: "Sumergí en abundante agua con sal ya hirviendo. Mantené un hervor moderado y los paquetes cubiertos. Retirá, escurrí y esperá 5 minutos antes de abrir.", tip: "La chala amarillenta y la masa firme indican que la cocción está completa." }
       ],
-      note: "La chala no es solo envoltorio: también permite cocinar, conservar la forma y presentar la humita."
+      serving: "En olla, serví en cazuelas calientes con queso y una cucharadita de aceite de ají. En chala, llevá el paquete cerrado al plato para conservar aroma y temperatura.",
+      storage: "La humita cocida se conserva hasta 3 días en heladera. Los paquetes fríos pueden congelarse; recalentá al vapor o en agua suave.",
+      safety: "Enfriá la preparación antes de refrigerarla y utilizá chalas limpias, sin hongos ni zonas deterioradas."
     },
     locro: {
-      name: "Locro",
+      anchor: "receta-locro",
+      name: "Locro criollo de cocción lenta",
       emoji: "🥘",
       region: "Noroeste argentino y Cuyo",
-      introduction: "Este guiso comunitario de origen prehispánico reúne maíz blanco, porotos y zapallo. Con el tiempo incorporó carnes y condimentos de distintas tradiciones.",
+      introduction: "Maíz blanco, porotos y zapallo se cocinan hasta formar un guiso espeso y comunitario. La paciencia, más que la harina o la crema, es la responsable de su textura.",
+      meta: [
+        { label: "Rinde", value: "10–12 porciones" },
+        { label: "Remojo", value: "8–12 horas" },
+        { label: "Preparación", value: "45 minutos" },
+        { label: "Cocción", value: "3½–4 horas" },
+        { label: "Dificultad", value: "Intermedia" }
+      ],
+      equipment: ["Olla de 8–10 litros", "Dos recipientes para remojo", "Cuchillo y tablas separadas", "Espumadera", "Cucharón de madera", "Sartén pequeña para la salsa"],
+      ingredientGroups: [
+        { title: "Legumbres y vegetales", items: ["1 kg de maíz blanco pisado", "250 g de porotos blancos", "1 kg de zapallo anco o criollo", "500 g de papa o batata", "2 cebollas", "2 puerros o cebollas de verdeo"] },
+        { title: "Carnes", items: ["700 g de carne vacuna para guiso", "300 g de panceta o cuerito de cerdo", "2 chorizos colorados", "Opcional: 300 g de falda o pechito de cerdo"] },
+        { title: "Condimentos y salsa", items: ["2 cucharadas de pimentón dulce", "1 cucharadita de ají molido", "1 cucharadita de comino", "2 dientes de ajo", "4 cucharadas de aceite", "Sal, pimienta y verdeo fresco"] }
+      ],
       variations: [
-        { name: "Criollo", place: "Noroeste y Cuyo", detail: "Combina maíz, porotos, zapallo, panceta y chorizo colorado en una cocción prolongada." },
-        { name: "De altura", place: "Puna", detail: "Suma charqui y papa, ingredientes ligados a la conservación y a los caminos andinos." }
+        { name: "Locro criollo", place: "Noroeste y Cuyo", detail: "Usá carnes frescas, panceta y chorizo colorado. El zapallo debe deshacerse para unir maíz, porotos y caldo." },
+        { name: "Locro de altura", place: "Puna", detail: "Reemplazá parte de las carnes por 350–400 g de charqui desalado y deshilachado; incorporá papa andina y moderá la sal hasta el final." }
       ],
       steps: [
-        "Remojar por separado el maíz blanco y los porotos desde la noche anterior.",
-        "Iniciar la cocción con abundante agua; incorporar las carnes y retirar la espuma cuando sea necesario.",
-        "Agregar zapallo y cocinar a fuego bajo hasta que se deshaga y espese naturalmente el guiso.",
-        "Servir bien caliente con una salsa de cebolla, pimentón y ají preparada aparte."
+        { title: "Remojar por separado", time: "8–12 h", detail: "Lavá maíz y porotos hasta que el agua salga clara. Cubrilos por separado con al menos tres veces su volumen de agua y dejalos en frío durante la noche.", tip: "Separarlos permite controlar sus distintos tiempos de cocción." },
+        { title: "Preparar con seguridad", time: "20 min", detail: "Cortá vegetales y carnes en tablas distintas. Retirá exceso de grasa, cortá la carne en cubos medianos y el chorizo en ruedas gruesas.", tip: "Lavá manos, cuchillos y superficies después de manipular carnes crudas." },
+        { title: "Iniciar el maíz", time: "60 min", detail: "Escurrí el maíz, ponelo en la olla y cubrí con agua nueva unos 6 cm por encima. Llevá a hervor suave, revolviendo cada tanto para que no se asiente.", tip: "Tené agua caliente aparte para reponer sin detener la cocción." },
+        { title: "Sumar porotos y carnes", time: "75 min", detail: "Agregá porotos escurridos, carne vacuna y panceta. Retirá con espumadera las impurezas de la superficie y mantené un hervor bajo, sin tapar por completo.", tip: "No sales todavía: la sal temprana puede retrasar el ablandamiento de los porotos." },
+        { title: "Incorporar chorizo y aromáticos", time: "35 min", detail: "Añadí chorizo, cebolla y puerro. Mezclá desde el fondo con suavidad. Si usás charqui, desalalo previamente y sumalo deshilachado en esta etapa.", tip: "Un fuego demasiado fuerte rompe el maíz antes de que quede tierno." },
+        { title: "Espesar con zapallo", time: "45–60 min", detail: "Agregá zapallo y papa. Cociná hasta que el zapallo se deshaga; ayudalo presionando algunos cubos contra la pared de la olla. El locro debe quedar cremoso, no seco.", tip: "Si se espesa demasiado, corregí con agua o caldo caliente en pequeñas cantidades." },
+        { title: "Preparar la salsa", time: "10 min", detail: "Calentá aceite a fuego bajo, sumá ajo y verdeo y apagá. Incorporá pimentón y ají molido; mezclá y dejá reposar para que el aceite tome color.", tip: "Nunca quemes el pimentón: se vuelve amargo." },
+        { title: "Reposar y servir", time: "20 min", detail: "Ajustá sal, pimienta y comino solo cuando todo esté tierno. Apagá y dejá reposar tapado. Serví en plato hondo con la salsa picante aparte.", tip: "Como muchos guisos, el sabor se integra todavía más al día siguiente." }
       ],
-      note: "El locro necesita tiempo: la cocción lenta integra sabores y convierte al zapallo en el espesante de la olla."
+      serving: "Serví porciones generosas en platos hondos precalentados. Ofrecé salsa de ají, verdeo fresco y pan casero por separado.",
+      storage: "Dividí en recipientes bajos y refrigerá hasta 3 días. Se puede congelar por porciones; descongelá en heladera y recalentá hasta hervor completo.",
+      safety: "No uses los mismos utensilios para carnes crudas y vegetales listos para consumir. Enfriá rápidamente las sobras y no recalientes más de una vez."
     },
     tamales: {
-      name: "Tamales norteños",
+      anchor: "receta-tamales",
+      name: "Tamales norteños en chala",
       emoji: "🫔",
       region: "Salta · Jujuy · Catamarca · Tucumán",
-      introduction: "Tamal significa “envuelto”. La masa de maíz se combina con zapallo y guarda un relleno condimentado antes de cerrarse en chalas.",
+      introduction: "Una masa de maíz y zapallo envuelve un corazón de carne condimentada. La técnica depende tanto de la consistencia de la masa como de un paquete bien cerrado.",
+      meta: [
+        { label: "Rinde", value: "12 tamales" },
+        { label: "Preparación", value: "1 h 20 min" },
+        { label: "Reposo", value: "20 minutos" },
+        { label: "Cocción", value: "30–40 minutos" },
+        { label: "Dificultad", value: "Intermedia/alta" }
+      ],
+      equipment: ["Olla grande", "Sartén amplia", "Dos recipientes", "Cuchara de madera", "Cucharón o taza medidora", "Hilo de algodón opcional"],
+      ingredientGroups: [
+        { title: "Masa", items: ["500 g de harina de maíz fina", "450 g de zapallo anco cocido y hecho puré", "80–120 ml de caldo tibio", "2 cucharadas de grasa o aceite", "24 chalas secas más tiras para atar"] },
+        { title: "Relleno", items: ["450 g de carne de cerdo o vacuna picada a cuchillo", "2 cebollas medianas", "2 huevos duros", "2 cebollas de verdeo", "Opcional para versión agridulce: 60 g de pasas hidratadas"] },
+        { title: "Condimentos", items: ["1½ cucharaditas de pimentón", "1 cucharadita de comino", "½ cucharadita de ají molido", "Sal y pimienta", "Opcional: pizca de orégano"] }
+      ],
       variations: [
-        { name: "Norteño", place: "NOA", detail: "Masa de maíz y zapallo con relleno de cerdo, cebolla, huevo, pimentón y ají." },
-        { name: "Agridulce", place: "Recetas familiares", detail: "Incorpora pasas de uva para contrastar el relleno de carne con un matiz dulce." }
+        { name: "Tamal norteño", place: "NOA", detail: "Relleno salado de carne, cebolla y huevo con una masa de maíz condimentada y equilibrada." },
+        { name: "Tamal agridulce", place: "Recetas familiares", detail: "Agregá pasas hidratadas al relleno y reducí levemente el ají; el contraste dulce no debe dominar el maíz ni la carne." }
       ],
       steps: [
-        "Hidratar las chalas secas en agua caliente hasta que sean flexibles y no se quiebren.",
-        "Preparar una masa maleable con harina de maíz, zapallo y condimentos.",
-        "Disponer masa y relleno sobre las chalas, cerrar formando un paquete y atar con una tira de la misma hoja.",
-        "Hervir en abundante agua hasta que el tamal esté firme y la masa completamente cocida."
+        { title: "Hidratar las chalas", time: "20 min", detail: "Cubrilas con agua muy caliente hasta que sean flexibles. Enjuagá, escurrí y secá. Elegí las más grandes para envolver y cortá las pequeñas en tiras largas.", tip: "Mantenelas bajo un paño húmedo para que no vuelvan a quebrarse." },
+        { title: "Cocinar el zapallo", time: "20 min", detail: "Cocinalo al vapor o al horno para evitar exceso de agua. Hacé un puré liso y dejalo entibiar antes de mezclar con la harina.", tip: "Un puré acuoso obliga a sumar demasiada harina y endurece el tamal." },
+        { title: "Preparar el relleno", time: "20 min", detail: "Rehogá cebolla en grasa, incorporá la carne y cociná hasta que cambie de color. Sumá comino, pimentón y ají fuera del fuego. Enfriá y agregá huevo y verdeo.", tip: "El relleno debe estar frío antes del armado." },
+        { title: "Amasar", time: "12 min", detail: "Mezclá harina, puré, grasa y sal. Agregá caldo tibio de a cucharadas hasta lograr una masa suave que conserve la forma sin agrietarse.", tip: "Probá una bolita: debe poder aplanarse entre los dedos sin desarmarse." },
+        { title: "Formar las porciones", time: "10 min", detail: "Dividí la masa en 12 partes. Aplastá cada una hasta formar un óvalo de 1 cm, colocá una cucharada de relleno y cerrá la masa alrededor.", tip: "El relleno no debe tocar la chala; así el paquete queda más firme." },
+        { title: "Envolver", time: "20 min", detail: "Superponé dos chalas con las partes anchas al centro. Colocá la porción, plegá laterales y puntas y atá sin estrangular el paquete.", tip: "Todos los tamales del mismo tamaño se cocinan de manera uniforme." },
+        { title: "Hervir", time: "30–40 min", detail: "Acomodá en olla con agua salada hirviendo. Mantené hervor moderado y cubiertos de agua. Retirá uno, abrilo y comprobá que la masa esté firme y se separe de la hoja.", tip: "Si flotan, apoyá encima un plato resistente al calor para mantenerlos sumergidos." },
+        { title: "Asentar antes de servir", time: "10 min", detail: "Escurrí y dejá reposar tapados con un paño. El vapor interior termina de estabilizar la masa y evita que se rompa al abrir.", tip: "Abrí la chala con cuidado: el centro conserva mucho calor." }
       ],
-      note: "La forma de atar, el picante y las proporciones del relleno cambian de una casa a otra."
+      serving: "Serví uno o dos por persona, todavía envueltos, con salsa de ají y una ensalada fresca. La chala se abre en el plato y no se come.",
+      storage: "Refrigerá cocidos hasta 3 días o congelá individualmente. Recalentá al vapor o en agua caliente sin retirar la chala.",
+      safety: "Usá chalas limpias y descartá las que tengan hongos. Enfriá el relleno antes de armar y cociná completamente la carne."
     }
   },
 
