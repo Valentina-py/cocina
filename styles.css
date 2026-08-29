@@ -2828,7 +2828,7 @@ main {
 }
 
 /* Celular: navegación vertical, objetivos grandes y receta por secciones */
-@media (max-width: 960px), (max-width: 1400px) and (max-height: 700px) {
+@media (max-width: 960px), (max-width: 1100px) and (orientation: portrait), (max-width: 1400px) and (max-height: 700px) {
   html {
     height: auto;
     min-height: 100%;
@@ -3313,7 +3313,7 @@ main {
   }
 }
 
-@media (max-width: 960px), (max-width: 1400px) and (max-height: 700px) {
+@media (max-width: 960px), (max-width: 1100px) and (orientation: portrait), (max-width: 1400px) and (max-height: 700px) {
   .guide-entry {
     min-height: 0;
     grid-template-columns: 47px 1fr;
@@ -3735,8 +3735,74 @@ main {
   }
 }
 
+/* Una misma identidad salteña para celular, tablet y computadora. */
+.orientation-guard {
+  display: none !important;
+}
+
+.game-screen {
+  background-color: #6f3c1f;
+  background-image:
+    linear-gradient(105deg, rgba(45, 20, 9, 0.42), rgba(120, 61, 27, 0.2) 48%, rgba(34, 17, 8, 0.5)),
+    url("assets/mesa-yungas-mobile.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.pantry {
+  background:
+    linear-gradient(160deg, rgba(39, 20, 11, 0.96), rgba(82, 39, 18, 0.93)),
+    repeating-linear-gradient(0deg, transparent 0 82px, rgba(255,255,255,0.055) 83px 85px);
+  border-color: #5d301a;
+  box-shadow: inset -8px 0 25px rgba(0,0,0,0.28), 8px 0 24px rgba(38,16,6,0.16);
+}
+
+.cook-zone {
+  background:
+    radial-gradient(ellipse at center 66%, rgba(255, 158, 43, 0.26), transparent 43%),
+    linear-gradient(rgba(91, 42, 17, 0.38), rgba(48, 22, 10, 0.58));
+  box-shadow: inset 0 0 55px rgba(255, 190, 83, 0.07);
+}
+
+.order {
+  background: linear-gradient(150deg, rgba(36, 18, 10, 0.95), rgba(75, 36, 18, 0.91));
+  border-color: #5d301a;
+  box-shadow: inset 8px 0 24px rgba(0,0,0,0.24), -8px 0 22px rgba(35,14,5,0.15);
+}
+
+.ingredient-token {
+  border: 2px solid #6c3b22;
+  color: #382016;
+  background: linear-gradient(150deg, #f1c77f, #bd793d);
+  box-shadow: inset 0 2px 0 rgba(255,244,206,0.38), inset 0 -5px 0 rgba(92,42,19,0.2), 0 5px 9px rgba(35,14,5,0.24);
+}
+
+.ingredient-token strong {
+  color: #321b12;
+}
+
+.ingredient-token small {
+  color: #65422e;
+}
+
+.ingredient-token.is-added {
+  opacity: 1;
+  border-color: #8bb455;
+  color: #fff7dc;
+  background: linear-gradient(150deg, #5d8244, #315138);
+}
+
+.ingredient-token.is-added strong,
+.ingredient-token.is-added small {
+  color: #fff7dc;
+}
+
+.mobile-game-nav {
+  background: rgba(54, 27, 14, 0.97);
+}
+
 /* Escenario 9:16 inspirado en Salta y la selva de Yungas. */
-@media (max-width: 700px) and (orientation: portrait) {
+@media (max-width: 1100px) and (orientation: portrait) {
   .topbar {
     background: linear-gradient(105deg, rgba(47, 24, 13, 0.98), rgba(105, 48, 24, 0.97));
     border-bottom-color: rgba(255, 197, 94, 0.3);
@@ -4084,6 +4150,483 @@ main {
       linear-gradient(90deg, transparent 25px, rgba(186,74,48,0.16) 26px 27px, transparent 28px),
       repeating-linear-gradient(0deg, transparent 0 31px, rgba(98,66,44,0.09) 32px 33px),
       #fff2d2;
+  }
+}
+
+/* El fogón y el termómetro también forman parte del escenario horizontal. */
+@media (orientation: landscape), (min-width: 1101px) {
+  .heat-meter {
+    --heat-level: 0%;
+    width: 47px;
+    height: clamp(155px, 34vh, 230px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    right: clamp(8px, 1.4vw, 22px);
+    z-index: 5;
+    padding: 10px 7px 8px;
+    border: 3px solid #4c2717;
+    border-radius: 25px;
+    background: linear-gradient(145deg, #c27a3f, #6f351d);
+    box-shadow: inset 0 0 0 2px rgba(255, 223, 151, 0.35), 0 9px 17px rgba(34, 14, 5, 0.38);
+    transform: translateY(-50%);
+  }
+
+  .heat-meter-track {
+    width: 17px;
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #f5d69b;
+    border-radius: 12px 12px 7px 7px;
+    background: linear-gradient(to top, #55ad39 0 24%, #c7d52a 24% 47%, #ffbd29 47% 70%, #f26827 70% 86%, #c72f30 86% 100%);
+    box-shadow: inset 0 0 7px rgba(42, 18, 5, 0.5);
+  }
+
+  .heat-meter-track::after {
+    content: "";
+    height: calc(100% - var(--heat-level));
+    position: absolute;
+    inset: 0 0 auto;
+    background: rgba(54, 31, 17, 0.72);
+    transition: height 450ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .heat-meter-level {
+    width: 100%;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    background: rgba(255, 244, 192, 0.22);
+    box-shadow: 0 -3px 9px #fff0a4;
+    transition: height 450ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .heat-meter-bulb {
+    width: 29px;
+    height: 29px;
+    flex: 0 0 auto;
+    margin-top: -4px;
+    position: relative;
+    z-index: 3;
+    border: 4px solid #f5d69b;
+    border-radius: 50%;
+    background: #4ca738;
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(35,14,6,0.4);
+  }
+
+  .wood-fire {
+    width: clamp(135px, 17vw, 210px);
+    height: clamp(68px, 14vh, 100px);
+    display: block;
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    z-index: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 10px 9px rgba(48, 17, 5, 0.52));
+  }
+
+  .drop-zone:not([data-vessel="pot"]) .wood-fire {
+    display: none;
+  }
+
+  .flame {
+    width: 29%;
+    height: 72%;
+    position: absolute;
+    left: 35%;
+    bottom: 18%;
+    border-radius: 70% 30% 62% 38%;
+    background: linear-gradient(135deg, #fff178 12%, #ffb02d 48%, #ed5b26 78%);
+    box-shadow: 0 0 24px rgba(255, 137, 31, 0.66);
+    transform: rotate(45deg);
+    transform-origin: 50% 85%;
+    animation: mobile-flame 720ms ease-in-out infinite alternate;
+  }
+
+  .flame-one {
+    width: 23%;
+    height: 56%;
+    left: 22%;
+    bottom: 17%;
+    animation-delay: -240ms;
+  }
+
+  .flame-three {
+    width: 22%;
+    height: 52%;
+    left: 54%;
+    bottom: 18%;
+    animation-delay: -430ms;
+  }
+
+  .log {
+    width: 64%;
+    height: 20%;
+    position: absolute;
+    left: 18%;
+    bottom: 7%;
+    border: 4px solid #4b2818;
+    border-radius: 13px;
+    background: repeating-linear-gradient(90deg, #92502b 0 13px, #6d351e 14px 18px);
+    box-shadow: inset 0 3px 0 rgba(255, 198, 112, 0.16);
+  }
+
+  .log-one { transform: rotate(10deg); }
+  .log-two { transform: rotate(-10deg); }
+
+  .vessel {
+    z-index: 2;
+  }
+
+  .vessel--pot {
+    border-color: #512817;
+    border-top-color: #3f2015;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 214, 129, 0.11) 35px 39px),
+      linear-gradient(145deg, #8c3e24, #d36c39 48%, #76301f);
+    box-shadow: inset 0 -20px 24px rgba(67, 20, 8, 0.3), 0 19px 21px rgba(40, 15, 5, 0.44);
+  }
+
+  .drop-instruction,
+  .added-chips {
+    position: relative;
+    z-index: 4;
+  }
+}
+
+/* Celebración final de peña: panel real y adaptable, no una imagen estática. */
+.complete-screen {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+  padding: clamp(82px, 12vh, 120px) clamp(18px, 4vw, 68px) 28px;
+  overflow: auto;
+  color: #fff4dc;
+  background-color: #07172c;
+  background-image:
+    linear-gradient(rgba(5, 15, 31, 0.12), rgba(16, 8, 10, 0.42)),
+    url("assets/fondo-victoria-pena.jpg");
+  background-position: center;
+  background-size: cover;
+  scrollbar-width: thin;
+  scrollbar-color: #d99b3d rgba(20, 10, 8, 0.25);
+}
+
+.victory-board {
+  width: min(1120px, 96vw);
+  min-height: 520px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  grid-template-areas: "copy qr";
+  align-items: center;
+  gap: clamp(24px, 4vw, 55px);
+  position: relative;
+  z-index: 2;
+  padding: clamp(70px, 10vh, 92px) clamp(24px, 4vw, 54px) clamp(26px, 4vh, 42px);
+  border: 5px solid #d39a43;
+  border-radius: 38px 38px 52px 52px;
+  background:
+    linear-gradient(90deg, transparent 0 7%, rgba(255,216,144,0.055) 7.4% 7.8%, transparent 8.2% 92%, rgba(255,216,144,0.055) 92.4% 92.8%, transparent 93.2%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 2px, transparent 3px 31px),
+    linear-gradient(145deg, rgba(104, 48, 23, 0.97), rgba(54, 25, 15, 0.98));
+  box-shadow: inset 0 0 0 3px #5a2a19, inset 0 0 45px rgba(255, 188, 78, 0.12), 0 30px 70px rgba(0,0,0,0.52);
+}
+
+.victory-board::before,
+.victory-board::after {
+  content: "";
+  height: 22px;
+  position: absolute;
+  right: 24px;
+  left: 24px;
+  background:
+    linear-gradient(135deg, transparent 25%, #f0bf70 25% 50%, transparent 50% 75%, #4c9a8d 75%) 0 0 / 28px 28px,
+    #8e2f2b;
+  box-shadow: 0 0 0 3px #4e281c;
+}
+
+.victory-board::before {
+  top: 19px;
+}
+
+.victory-board::after {
+  bottom: 19px;
+  transform: scaleY(-1);
+}
+
+.victory-trophy {
+  width: 190px;
+  height: 150px;
+  position: absolute;
+  top: -88px;
+  left: 50%;
+  z-index: 4;
+  filter: drop-shadow(0 13px 13px rgba(27, 10, 3, 0.45));
+  transform: translateX(-50%);
+}
+
+.victory-empanada {
+  width: 114px;
+  height: 55px;
+  position: absolute;
+  top: 0;
+  left: 38px;
+  z-index: 4;
+  overflow: hidden;
+  border: 5px solid #8b5315;
+  border-bottom-width: 8px;
+  border-radius: 75px 75px 18px 18px;
+  background: linear-gradient(145deg, #fff19b, #f0b837 48%, #c77d18);
+  box-shadow: inset 0 5px 0 rgba(255,255,255,0.35), 0 4px 0 #704010;
+}
+
+.victory-empanada::after {
+  content: "";
+  height: 11px;
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  background: repeating-linear-gradient(135deg, #f7d368 0 7px, #b96e17 8px 11px);
+}
+
+.victory-cup {
+  width: 104px;
+  height: 77px;
+  position: absolute;
+  top: 45px;
+  left: 43px;
+  border: 6px solid #855015;
+  border-top: 0;
+  border-radius: 10px 10px 47px 47px;
+  background: linear-gradient(120deg, #e79c20, #fff094 45%, #d88918 72%, #aa6013);
+  box-shadow: inset 0 -12px 0 rgba(132,72,12,0.16);
+}
+
+.victory-cup::before,
+.victory-cup::after {
+  content: "";
+  width: 34px;
+  height: 43px;
+  position: absolute;
+  top: 10px;
+  border: 8px solid #d9921f;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.victory-cup::before { left: -32px; }
+.victory-cup::after { right: -32px; }
+
+.victory-cup i {
+  width: 46px;
+  height: 20px;
+  position: absolute;
+  bottom: -24px;
+  left: 23px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #b96a13, #ffe885, #b96a13);
+}
+
+.victory-trophy-base {
+  width: 125px;
+  height: 20px;
+  position: absolute;
+  bottom: 0;
+  left: 33px;
+  border: 4px solid #754310;
+  border-radius: 8px;
+  background: linear-gradient(#f1c64e, #b66d14);
+}
+
+.victory-board .complete-copy {
+  grid-area: copy;
+  text-align: center;
+}
+
+.victory-board .complete-copy .eyebrow {
+  color: #ffd275;
+}
+
+.victory-board .complete-copy h1 {
+  margin-block: 8px 10px;
+  color: #fff1c9;
+  font-size: clamp(38px, 5.2vw, 68px);
+  line-height: 0.98;
+  text-shadow: 0 4px 0 #782d24, 0 9px 22px rgba(24,8,4,0.45);
+}
+
+.victory-board .complete-copy > p:not(.eyebrow) {
+  max-width: 620px;
+  margin: 0 auto 14px;
+  color: #f2dfc0;
+  font-size: clamp(13px, 1.25vw, 17px);
+  line-height: 1.45;
+}
+
+.victory-board .achievement {
+  width: min(520px, 100%);
+  margin: 0 auto 15px;
+  border-color: rgba(255, 214, 118, 0.34);
+  background: rgba(45, 19, 10, 0.54);
+}
+
+.victory-form {
+  width: min(560px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+  margin: 0 auto 15px;
+}
+
+.victory-field {
+  display: grid;
+  gap: 5px;
+  text-align: left;
+}
+
+.victory-field label {
+  color: #f4d79a;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.victory-field label span {
+  color: #c9b28a;
+  font-weight: 700;
+}
+
+.victory-field input {
+  width: 100%;
+  min-height: 52px;
+  padding: 11px 14px;
+  border: 3px solid #d4a34d;
+  border-radius: 16px;
+  outline: 0;
+  color: #382117;
+  background: linear-gradient(#fff9e7, #f5dfb4);
+  box-shadow: inset 0 2px 5px rgba(83,43,20,0.14), 0 5px 0 #6f361d;
+  font-size: 16px;
+  font-weight: 750;
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: manipulation;
+}
+
+.victory-field input::placeholder {
+  color: #9a7d64;
+}
+
+.victory-field input:focus {
+  border-color: #ffe483;
+  box-shadow: 0 0 0 4px rgba(255, 221, 114, 0.22), 0 5px 0 #6f361d;
+}
+
+.victory-name-button {
+  min-height: 50px;
+  grid-column: 1 / -1;
+  border: 2px solid #ffdf83;
+  border-radius: 16px;
+  color: #321b13;
+  background: linear-gradient(145deg, #ffe889, #e9a62c);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.35), 0 6px 0 #874416;
+  font-weight: 950;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.victory-name-button:active {
+  box-shadow: 0 2px 0 #874416;
+  transform: translateY(4px);
+}
+
+.victory-signature {
+  grid-column: 1 / -1;
+  margin: 2px 0 0 !important;
+  padding: 9px 12px;
+  border: 1px solid rgba(127, 203, 163, 0.45);
+  border-radius: 13px;
+  color: #efffdc !important;
+  background: rgba(48, 103, 72, 0.52);
+  font-size: 12px !important;
+  font-weight: 800;
+}
+
+.victory-board .primary-button {
+  min-height: 50px;
+  margin-top: 0;
+}
+
+.victory-board .qr-card {
+  width: min(330px, 100%);
+  grid-area: qr;
+  justify-self: center;
+  position: relative;
+  z-index: 2;
+  border: 3px solid #d5a24a;
+  background: linear-gradient(150deg, rgba(255,248,225,0.98), rgba(241,216,171,0.98));
+  box-shadow: 0 18px 34px rgba(27,9,4,0.38);
+}
+
+@media (max-width: 900px), (max-height: 700px) {
+  .complete-screen {
+    min-height: calc(100vh - 64px);
+    padding: 76px 10px 18px;
+    overflow: visible;
+    background-attachment: scroll;
+  }
+
+  .victory-board {
+    width: min(680px, calc(100vw - 18px));
+    min-height: 0;
+    grid-template-columns: 1fr;
+    grid-template-areas: "copy" "qr";
+    gap: 24px;
+    padding: 70px 17px 40px;
+    border-width: 4px;
+    border-radius: 30px;
+  }
+
+  .victory-trophy {
+    width: 170px;
+    transform: translateX(-50%) scale(0.88);
+  }
+
+  .victory-form {
+    grid-template-columns: 1fr;
+  }
+
+  .victory-name-button,
+  .victory-signature {
+    grid-column: 1;
+  }
+
+  .victory-board .qr-card {
+    width: min(350px, 100%);
+  }
+}
+
+@media (max-width: 480px) {
+  .victory-board .complete-copy h1 {
+    font-size: clamp(36px, 12vw, 50px);
+  }
+
+  .victory-field input {
+    min-height: 56px;
+    font-size: 16px;
+  }
+
+  .victory-board .qr-card {
+    padding: 18px 14px;
   }
 }
 

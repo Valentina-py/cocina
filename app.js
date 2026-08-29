@@ -50,6 +50,10 @@
     completeTitle: document.querySelector("#complete-title"),
     completeMessage: document.querySelector("#complete-message"),
     achievementTitle: document.querySelector("#achievement-title"),
+    victoryForm: document.querySelector("#victory-form"),
+    playerName: document.querySelector("#player-name"),
+    groupName: document.querySelector("#group-name"),
+    victorySignature: document.querySelector("#victory-signature"),
     playAgain: document.querySelector("#play-again"),
     qrcode: document.querySelector("#qrcode"),
     recipeLink: document.querySelector("#recipe-link"),
@@ -753,6 +757,9 @@
     el.completeTitle.textContent = "¡El fogón está de fiesta!";
     el.completeMessage.textContent = `Completaste ${current.name}. Cada ingrediente cuenta una historia de territorio, intercambio y memoria.`;
     el.achievementTitle.textContent = current.achievement;
+    el.victoryForm.reset();
+    el.victorySignature.hidden = true;
+    el.victorySignature.textContent = "";
     el.statusText.textContent = `${current.name} completada`;
     el.idleIndicator.hidden = true;
     activateScreen(el.completeScreen);
@@ -761,6 +768,26 @@
 
     state.sessionActive = true;
     armIdleTimer();
+  }
+
+  function personalizeVictory(event) {
+    event.preventDefault();
+    const playerName = el.playerName.value.trim();
+    const groupName = el.groupName.value.trim();
+
+    if (!playerName) {
+      el.playerName.setCustomValidity("Escribí tu nombre para personalizar el reconocimiento.");
+      el.playerName.reportValidity();
+      el.playerName.focus();
+      return;
+    }
+
+    el.playerName.setCustomValidity("");
+    el.completeTitle.textContent = `¡Felicitaciones, ${playerName}!`;
+    el.victorySignature.textContent = groupName
+      ? `Este reconocimiento celebra a ${playerName}, de ${groupName}.`
+      : `Este reconocimiento celebra a ${playerName}.`;
+    el.victorySignature.hidden = false;
   }
 
   function generateQr() {
@@ -995,6 +1022,8 @@
 
   el.homeButton.addEventListener("click", () => resetToMenu());
   el.playAgain.addEventListener("click", () => resetToMenu());
+  el.victoryForm.addEventListener("submit", personalizeVictory);
+  el.playerName.addEventListener("input", () => el.playerName.setCustomValidity(""));
   el.toastClose.addEventListener("click", hideToast);
   el.soundToggle.addEventListener("click", toggleSound);
   el.fullscreenToggle.addEventListener("click", toggleFullscreenMode);
