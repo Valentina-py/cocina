@@ -2778,19 +2778,25 @@ main {
 }
 
 /* Celular: navegación vertical, objetivos grandes y receta por secciones */
-@media (max-width: 699px) {
+@media (max-width: 699px), (pointer: coarse) and (max-height: 540px) {
   html,
   body {
     height: auto;
     min-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: contain;
     touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .app-shell {
     height: auto;
     min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+    touch-action: pan-y;
   }
 
   .topbar {
@@ -2804,6 +2810,7 @@ main {
     min-width: 0;
     gap: 8px;
     padding-inline: 5px;
+    touch-action: pan-y;
   }
 
   .brand-mark {
@@ -2848,6 +2855,17 @@ main {
   .screen {
     height: auto;
     min-height: calc(100vh - 64px);
+    overflow: visible;
+    touch-action: pan-y;
+  }
+
+  .menu-screen,
+  .game-screen,
+  .complete-screen {
+    overflow-x: hidden;
+    overflow-y: visible;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y;
   }
 
   .menu-screen {
@@ -2880,6 +2898,7 @@ main {
   .dish-card {
     min-height: 112px;
     padding: 16px;
+    touch-action: pan-y;
   }
 
   .dish-icon {
@@ -2934,7 +2953,7 @@ main {
   .ingredient-token {
     min-height: 0;
     padding: 9px 5px;
-    touch-action: manipulation;
+    touch-action: pan-y;
   }
 
   .ingredient-token span {
@@ -3007,6 +3026,8 @@ main {
     max-height: calc(100vh - 28px);
     padding: 28px 18px 22px;
     overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .modal-card h2 {
@@ -3171,7 +3192,7 @@ main {
   }
 }
 
-@media (max-width: 699px) {
+@media (max-width: 699px), (pointer: coarse) and (max-height: 540px) {
   .guide-entry {
     min-height: 0;
     grid-template-columns: 47px 1fr;

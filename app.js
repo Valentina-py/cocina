@@ -443,6 +443,7 @@
     state.sessionActive = true;
     el.menuNotice.hidden = true;
     activateScreen(el.gameScreen);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     renderGame();
     armIdleTimer();
   }
@@ -657,6 +658,7 @@
     el.statusText.textContent = `${current.name} completada`;
     el.idleIndicator.hidden = true;
     activateScreen(el.completeScreen);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     generateQr();
 
     state.sessionActive = true;
@@ -732,6 +734,7 @@
 
     activateScreen(el.menuScreen);
     el.menuScreen.scrollTop = 0;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     el.statusText.textContent = "Elegí una receta para comenzar";
     el.idleIndicator.hidden = true;
     el.sessionStatus.classList.remove("is-warning");
@@ -780,6 +783,8 @@
     const button = event.target.closest("[data-ingredient]");
     if (!button || !state.recipeId) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    const scrollablePhone = window.matchMedia("(max-width: 699px), (pointer: coarse) and (max-height: 540px)").matches;
+    if (scrollablePhone && event.pointerType !== "mouse") return;
 
     event.preventDefault();
     const id = button.dataset.ingredient;
@@ -873,7 +878,7 @@
   el.ingredientGrid.addEventListener("click", (event) => {
     if (Date.now() < state.suppressClickUntil) return;
     const button = event.target.closest("[data-ingredient]");
-    if (button && event.detail === 0) toggleIngredient(button.dataset.ingredient);
+    if (button) toggleIngredient(button.dataset.ingredient);
   });
 
   el.addedChips.addEventListener("click", (event) => {
@@ -902,9 +907,9 @@
   document.addEventListener("dragstart", (event) => event.preventDefault());
   document.addEventListener("gesturestart", (event) => event.preventDefault());
   document.addEventListener("touchmove", (event) => {
-    const standMode = window.matchMedia("(pointer: coarse) and (min-width: 700px)").matches;
-    const menuIsScrolling = event.target.closest?.(".menu-screen");
-    if (standMode && !menuIsScrolling) event.preventDefault();
+    const standMode = window.matchMedia("(pointer: coarse) and (min-width: 700px) and (min-height: 541px)").matches;
+    const scrollableArea = event.target.closest?.(".menu-screen, .modal-card");
+    if (standMode && !scrollableArea) event.preventDefault();
   }, { passive: false });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) noteActivity();
