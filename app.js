@@ -29,6 +29,9 @@
     progressBar: document.querySelector("#progress-bar"),
     heatMeter: document.querySelector("#heat-meter"),
     heatLevel: document.querySelector("#heat-level"),
+    heatDown: document.querySelector("#heat-down"),
+    heatUp: document.querySelector("#heat-up"),
+    heatStatus: document.querySelector("#heat-status"),
     fullscreenToggle: document.querySelector("#fullscreen-toggle"),
     fullscreenIcon: document.querySelector("#fullscreen-icon"),
     fullscreenLabel: document.querySelector("#fullscreen-label"),
@@ -49,12 +52,19 @@
     toastClose: document.querySelector("#toast-close"),
     completeTitle: document.querySelector("#complete-title"),
     completeMessage: document.querySelector("#complete-message"),
+    outcomeIllustration: document.querySelector("#outcome-illustration"),
     achievementTitle: document.querySelector("#achievement-title"),
+    secretAchievement: document.querySelector("#secret-achievement"),
+    secretAchievementIcon: document.querySelector("#secret-achievement-icon"),
+    secretAchievementTitle: document.querySelector("#secret-achievement-title"),
+    secretAchievementDescription: document.querySelector("#secret-achievement-description"),
     victoryForm: document.querySelector("#victory-form"),
     playerName: document.querySelector("#player-name"),
     visitorPlace: document.querySelector("#visitor-place"),
     victorySignature: document.querySelector("#victory-signature"),
+    retryRecipe: document.querySelector("#retry-recipe"),
     playAgain: document.querySelector("#play-again"),
+    victoryQrCard: document.querySelector("#victory-qr-card"),
     qrcode: document.querySelector("#qrcode"),
     recipeLink: document.querySelector("#recipe-link"),
     recipeLibrary: document.querySelector("#recipe-library"),
@@ -76,8 +86,49 @@
     toastTimer: null,
     sessionActive: false,
     suppressClickUntil: 0,
-    completed: false
+    completed: false,
+    ending: false,
+    heat: 45,
+    wrongAttempts: 0,
+    recoveredHeat: false,
+    sessionAchievements: new Set()
   };
+
+  const ACHIEVEMENT_STORAGE_KEY = "fogon-noa-logros-ocultos";
+  const unlockedAchievements = loadUnlockedAchievements();
+
+  function loadUnlockedAchievements() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(ACHIEVEMENT_STORAGE_KEY) || "[]");
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch (_) {
+      return new Set();
+    }
+  }
+
+  function unlockAchievement(id) {
+    const achievement = DATA.hiddenAchievements?.[id];
+    if (!achievement) return false;
+    state.sessionAchievements.add(id);
+    const isNew = !unlockedAchievements.has(id);
+    unlockedAchievements.add(id);
+    try {
+      window.localStorage.setItem(ACHIEVEMENT_STORAGE_KEY, JSON.stringify([...unlockedAchievements]));
+    } catch (_) {}
+    return isNew;
+  }
+
+  function renderSecretAchievement(id) {
+    const achievement = DATA.hiddenAchievements?.[id];
+    if (!achievement) {
+      el.secretAchievement.hidden = true;
+      return;
+    }
+    el.secretAchievementIcon.textContent = achievement.icon;
+    el.secretAchievementTitle.textContent = achievement.title;
+    el.secretAchievementDescription.textContent = achievement.description;
+    el.secretAchievement.hidden = false;
+  }
 
   const audioState = {
     context: null,
@@ -533,6 +584,11 @@
     state.added = new Set();
     state.variationHistory = [];
     state.completed = false;
+    state.ending = false;
+    state.heat = 45;
+    state.wrongAttempts = 0;
+    state.recoveredHeat = false;
+    state.sessionAchievements = new Set();
     state.sessionActive = true;
     el.menuNotice.hidden = true;
     activateScreen(el.gameScreen);
@@ -558,6 +614,7 @@
     renderChecklist(current);
     renderVessel(current);
     renderProgress(current);
+    renderHeat();
   }
 
   function renderPantry(current) {
@@ -625,14 +682,57 @@
     const percent = total ? Math.round((completed / total) * 100) : 0;
     el.progressLabel.textContent = `${completed} de ${total}`;
     el.progressBar.style.width = `${percent}%`;
-    el.heatMeter.style.setProperty("--heat-level", `${percent}%`);
-    el.heatMeter.setAttribute("aria-valuenow", String(percent));
-    el.heatMeter.setAttribute("aria-valuetext", `${percent}% de avance de cocción`);
-    el.heatLevel.style.height = `${Math.max(percent, 8)}%`;
+  }
+
+  function renderHeat() {
+    const heat = Math.max(0, Math.min(100, Math.round(state.heat)));
+    const label = heat < 35
+      ? "Fuego bajo"
+      : heat <= 75
+        ? "Fuego parejo"
+        : heat < 95
+          ? "¡Fuego muy fuerte!"
+          : "¡Se está quemando!";
+    const level = heat < 35 ? "low" : heat <= 75 ? "ideal" : heat < 95 ? "warning" : "critical";
+
+    el.heatMeter.style.setProperty("--heat-level", `${heat}%`);
+    el.heatMeter.setAttribute("aria-valuenow", String(heat));
+    el.heatMeter.setAttribute("aria-valuetext", `${label}, ${heat}%`);
+    el.heatLevel.style.height = `${Math.max(heat, 8)}%`;
+    el.heatStatus.textContent = label;
+    el.dropZone.dataset.heat = level;
+    el.heatMeter.dataset.heat = level;
+  }
+
+  function adjustHeat(delta) {
+    if (!state.recipeId || state.completed || state.ending) return;
+    noteActivity();
+    const previousHeat = state.heat;
+    state.heat = Math.max(10, Math.min(100, state.heat + delta));
+
+    if (previousHeat >= 80 && state.heat <= 75) {
+      state.recoveredHeat = true;
+      if (unlockAchievement("pulso_del_fogon")) {
+        const achievement = DATA.hiddenAchievements.pulso_del_fogon;
+        el.toastTitle.textContent = "¡Logro oculto descubierto!";
+        el.toastMessage.textContent = `${achievement.icon} ${achievement.title}. ${achievement.description}`;
+        showToast(9000, "discovery");
+      }
+    }
+
+    renderHeat();
+    if (state.heat >= 100) scheduleFailure("burned", 700);
+  }
+
+  function scheduleFailure(type, delayMs = 900) {
+    if (state.completed || state.ending) return;
+    state.ending = true;
+    window.clearTimeout(state.completionTimer);
+    state.completionTimer = window.setTimeout(() => failRecipe(type), delayMs);
   }
 
   function addIngredient(id) {
-    if (!state.recipeId || state.completed || state.added.has(id) || !ingredient(id)) return;
+    if (!state.recipeId || state.completed || state.ending || state.added.has(id) || !ingredient(id)) return;
 
     noteActivity();
     const current = recipe();
@@ -646,16 +746,22 @@
     }
 
     state.added.add(id);
+    state.heat = Math.min(100, state.heat + 4);
     playIngredientSound(current.vessel);
     spawnIngredientBurst(id);
 
     if (variation && DATA.recipes[variation.target]) {
       transformRecipe(variation, id);
-      state.completionTimer = window.setTimeout(checkCompletion, 1350);
     } else {
       renderGame();
-      state.completionTimer = window.setTimeout(checkCompletion, 420);
     }
+
+    if (state.heat >= 100) {
+      scheduleFailure("burned", 700);
+      return;
+    }
+
+    state.completionTimer = window.setTimeout(checkCompletion, variation ? 1350 : 420);
   }
 
   function toggleIngredient(id) {
@@ -667,11 +773,12 @@
   }
 
   function removeIngredient(id) {
-    if (!state.recipeId || state.completed || !state.added.has(id)) return;
+    if (!state.recipeId || state.completed || state.ending || !state.added.has(id)) return;
 
     noteActivity();
     window.clearTimeout(state.completionTimer);
     state.added.delete(id);
+    state.heat = Math.max(10, state.heat - 2);
 
     const lastVariation = state.variationHistory.at(-1);
     if (lastVariation?.trigger === id && lastVariation.to === state.recipeId) {
@@ -696,9 +803,12 @@
     const familyReasons = DATA.rejectionReasons[current.family] || {};
     const explanation = familyReasons[id] || familyReasons.default || "No figura en la comanda de esta versión.";
 
+    state.wrongAttempts += 1;
     playErrorSound();
     el.toastTitle.textContent = "Ese ingrediente no va en esta receta";
-    el.toastMessage.textContent = `${rejected.name} marca error en ${current.name}. ${explanation} No perdiste ningún avance.`;
+    el.toastMessage.textContent = state.wrongAttempts >= 3
+      ? `${rejected.name} marca error en ${current.name}. ${explanation} Después de tres intentos incorrectos, la preparación tomó un camino inesperado.`
+      : `${rejected.name} marca error en ${current.name}. ${explanation} No perdiste ningún avance.`;
     el.dropZone.classList.remove("is-rejected");
     token?.classList.remove("is-rejected");
     void el.dropZone.offsetWidth;
@@ -709,6 +819,7 @@
       token?.classList.remove("is-rejected");
     }, 720);
     showToast(9000, "error");
+    if (state.wrongAttempts >= 3) scheduleFailure("spoiled", 1250);
   }
 
   function transformRecipe(variation, triggerId) {
@@ -720,6 +831,7 @@
       anyOf: [...variation.anyOf]
     });
     state.recipeId = variation.target;
+    unlockAchievement("viajero_regional");
     renderGame();
 
     el.dropZone.classList.add("is-transforming");
@@ -743,23 +855,83 @@
 
   function checkCompletion() {
     const current = recipe();
-    if (!current || state.completed) return;
+    if (!current || state.completed || state.ending) return;
     if (current.required.every((id) => state.added.has(id))) completeRecipe();
+  }
+
+  function latestSessionAchievement() {
+    return [...state.sessionAchievements].at(-1) || null;
+  }
+
+  function failRecipe(type) {
+    if (state.completed) return;
+    const current = recipe();
+    const outcomes = {
+      burned: {
+        title: "¡El fogón se descontroló!",
+        message: `El fuego quedó demasiado fuerte y ${current.name} terminó quemándose. Bajá la temperatura antes de llegar a la zona roja.`,
+        achievement: "Aprendiz del Humo Norteño",
+        achievementId: "fuego_descontrolado"
+      },
+      spoiled: {
+        title: "¡La receta tomó un camino extraño!",
+        message: `Tres ingredientes que no pertenecían a la comanda estropearon ${current.name}. Leé las explicaciones y volvé a probar otra combinación.`,
+        achievement: "Alquimista del Desastre",
+        achievementId: "mezcla_imposible"
+      }
+    };
+    const outcome = outcomes[type] || outcomes.spoiled;
+
+    state.completed = true;
+    state.ending = false;
+    stopIdleTimer();
+    hideToast();
+    playErrorSound();
+    unlockAchievement(outcome.achievementId);
+
+    el.completeScreen.dataset.outcome = type;
+    el.completeTitle.textContent = outcome.title;
+    el.completeMessage.textContent = outcome.message;
+    el.achievementTitle.textContent = outcome.achievement;
+    el.outcomeIllustration.hidden = type !== "spoiled";
+    el.victoryForm.reset();
+    el.victoryForm.hidden = true;
+    el.victorySignature.hidden = true;
+    el.victorySignature.textContent = "";
+    el.retryRecipe.hidden = false;
+    el.playAgain.textContent = "Elegir otro plato";
+    el.victoryQrCard.hidden = true;
+    renderSecretAchievement(outcome.achievementId);
+    el.statusText.textContent = type === "burned" ? "Preparación quemada" : "Preparación estropeada";
+    el.idleIndicator.hidden = true;
+    activateScreen(el.completeScreen);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    state.sessionActive = true;
+    armIdleTimer();
   }
 
   function completeRecipe() {
     state.completed = true;
+    state.ending = false;
     playSuccessSound();
     hideToast();
     stopIdleTimer();
     const current = recipe();
 
+    el.completeScreen.dataset.outcome = "success";
     el.completeTitle.textContent = "¡El fogón está de fiesta!";
     el.completeMessage.textContent = `Completaste ${current.name}. Cada ingrediente cuenta una historia de territorio, intercambio y memoria.`;
     el.achievementTitle.textContent = current.achievement;
+    el.outcomeIllustration.hidden = true;
     el.victoryForm.reset();
+    el.victoryForm.hidden = false;
     el.victorySignature.hidden = true;
     el.victorySignature.textContent = "";
+    el.retryRecipe.hidden = true;
+    el.playAgain.textContent = "Cocinar otra receta";
+    el.victoryQrCard.hidden = false;
+    renderSecretAchievement(latestSessionAchievement());
     el.statusText.textContent = `${current.name} completada`;
     el.idleIndicator.hidden = true;
     activateScreen(el.completeScreen);
@@ -855,6 +1027,11 @@
     state.added = new Set();
     state.variationHistory = [];
     state.completed = false;
+    state.ending = false;
+    state.heat = 45;
+    state.wrongAttempts = 0;
+    state.recoveredHeat = false;
+    state.sessionAchievements = new Set();
     state.sessionActive = false;
 
     activateScreen(el.menuScreen);
@@ -864,6 +1041,8 @@
     el.idleIndicator.hidden = true;
     el.sessionStatus.classList.remove("is-warning");
     el.qrcode.replaceChildren();
+    el.secretAchievement.hidden = true;
+    el.outcomeIllustration.hidden = true;
 
     if (inactivity) {
       el.menuNotice.textContent = "La experiencia se reinició por inactividad. ¡Elegí un plato para volver a cocinar!";
@@ -871,6 +1050,14 @@
     } else {
       el.menuNotice.hidden = true;
     }
+  }
+
+  function retryCurrentRecipe() {
+    if (!state.recipeId) {
+      resetToMenu();
+      return;
+    }
+    startRecipe(state.recipeId);
   }
 
   function armIdleTimer(durationMs = DATA.config.inactivityMs) {
@@ -1022,6 +1209,9 @@
 
   el.homeButton.addEventListener("click", () => resetToMenu());
   el.playAgain.addEventListener("click", () => resetToMenu());
+  el.retryRecipe.addEventListener("click", retryCurrentRecipe);
+  el.heatDown.addEventListener("click", () => adjustHeat(-20));
+  el.heatUp.addEventListener("click", () => adjustHeat(20));
   el.victoryForm.addEventListener("submit", personalizeVictory);
   el.playerName.addEventListener("input", () => el.playerName.setCustomValidity(""));
   el.toastClose.addEventListener("click", hideToast);

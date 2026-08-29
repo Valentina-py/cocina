@@ -10,6 +10,29 @@ window.KITCHEN_DATA = {
     warningMs: 10000
   },
 
+  hiddenAchievements: {
+    fuego_descontrolado: {
+      icon: "🔥",
+      title: "Aprendiz del Humo Norteño",
+      description: "Avivaste el fuego hasta descubrir que hasta la mejor olla necesita paciencia."
+    },
+    mezcla_imposible: {
+      icon: "🫧",
+      title: "Alquimista del Desastre",
+      description: "Probaste tantos ingredientes ajenos a la comanda que encontraste el camino de la mezcla imposible."
+    },
+    pulso_del_fogon: {
+      icon: "🌡️",
+      title: "Pulso del Fogón",
+      description: "Rescataste una cocción en zona crítica bajando el fuego antes de que fuera tarde."
+    },
+    viajero_regional: {
+      icon: "🧭",
+      title: "Viajero/a de Sabores",
+      description: "Transformaste una receta siguiendo la pista de una variación regional."
+    }
+  },
+
   ingredients: {
     carne: { name: "Carne a cuchillo", icon: "🥩", tone: "red" },
     matambre: { name: "Matambre", icon: "🥩", tone: "red" },

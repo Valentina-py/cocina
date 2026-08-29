@@ -1500,7 +1500,7 @@ main {
   min-width: 0;
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   gap: 12px;
   padding: clamp(16px, 2vw, 27px) clamp(18px, 3vw, 42px);
   position: relative;
@@ -1754,6 +1754,75 @@ main {
   border-radius: inherit;
   background: linear-gradient(90deg, #e57c38, #ffd36b);
   transition: width 450ms cubic-bezier(.2,.8,.2,1);
+}
+
+.fire-controls {
+  display: grid;
+  grid-template-columns: minmax(92px, 1fr) auto minmax(92px, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.fire-controls button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid rgba(255, 220, 143, 0.45);
+  border-radius: 15px;
+  color: #fff2d2;
+  background: linear-gradient(145deg, rgba(105, 50, 24, 0.96), rgba(57, 27, 15, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 0 rgba(46, 20, 10, 0.65);
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.fire-controls button:active {
+  box-shadow: 0 1px 0 rgba(46, 20, 10, 0.65);
+  transform: translateY(3px);
+}
+
+.fire-controls button span {
+  color: #ffd064;
+  font-size: 18px;
+  line-height: 0;
+}
+
+.heat-status {
+  min-width: 102px;
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.heat-status strong {
+  color: #fff0c5;
+  font-size: 11px;
+}
+
+.heat-status small {
+  color: #d9c29e;
+  font-size: 8px;
+}
+
+.heat-meter[data-heat="warning"] {
+  animation: heat-warning 760ms ease-in-out infinite alternate;
+}
+
+.heat-meter[data-heat="critical"] {
+  animation: heat-critical 340ms ease-in-out infinite alternate;
+}
+
+.heat-meter[data-heat="warning"] .heat-meter-bulb {
+  background: #f47725;
+}
+
+.heat-meter[data-heat="critical"] .heat-meter-bulb {
+  background: #d52f2f;
+}
+
+.drop-zone[data-heat="critical"] {
+  box-shadow: inset 0 0 45px rgba(213, 47, 47, 0.34);
 }
 
 .order {
@@ -3092,7 +3161,7 @@ main {
   .cook-zone {
     min-height: 570px;
     padding: 22px 16px;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
   }
 
   .drop-zone {
@@ -3828,7 +3897,7 @@ main {
   .cook-zone {
     min-height: 510px;
     order: -3;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     gap: 8px;
     margin-top: 0;
     padding: 18px 10px 14px;
@@ -4577,6 +4646,140 @@ main {
   box-shadow: 0 18px 34px rgba(27,9,4,0.38);
 }
 
+.secret-achievement {
+  width: min(560px, 100%);
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto 15px;
+  padding: 12px 14px;
+  border: 2px solid #e8bb52;
+  border-radius: 18px;
+  color: #fff1c8;
+  background: linear-gradient(145deg, rgba(86, 42, 20, 0.96), rgba(36, 20, 14, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 18px rgba(22,8,3,0.3);
+  text-align: left;
+}
+
+.secret-achievement > span {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #3a2116;
+  background: linear-gradient(145deg, #ffe68a, #df9527);
+  font-size: 28px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.38);
+}
+
+.secret-achievement small,
+.secret-achievement strong {
+  display: block;
+}
+
+.secret-achievement small {
+  color: #f2bd5b;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.secret-achievement strong {
+  margin-top: 2px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+}
+
+.secret-achievement p {
+  margin: 4px 0 0 !important;
+  color: #dfccb0 !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+
+.outcome-illustration {
+  width: min(230px, 58vw);
+  aspect-ratio: 1;
+  margin: 0 auto 14px;
+  border: 4px solid #d49b45;
+  border-radius: 26px;
+  background-image: url("assets/empanada-estropeada.jpg");
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 14px 25px rgba(24,8,4,0.42), inset 0 0 0 2px rgba(255,239,191,0.28);
+}
+
+.ending-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ending-actions .primary-button {
+  margin: 0;
+}
+
+.retry-button {
+  color: #2f1c13;
+  background: linear-gradient(145deg, #ffe179, #e89b24);
+}
+
+.complete-screen[data-outcome="burned"] {
+  background-image:
+    linear-gradient(rgba(29, 10, 4, 0.08), rgba(15, 8, 8, 0.5)),
+    url("assets/fondo-desastre-cocina.jpg");
+}
+
+.complete-screen[data-outcome="spoiled"] {
+  background-image:
+    radial-gradient(circle at 50% 48%, rgba(107, 180, 55, 0.22), transparent 34%),
+    linear-gradient(rgba(27, 12, 7, 0.3), rgba(16, 8, 7, 0.58)),
+    url("assets/mesa-yungas-mobile.jpg");
+}
+
+.complete-screen[data-outcome="burned"] .victory-board,
+.complete-screen[data-outcome="spoiled"] .victory-board {
+  width: min(760px, 96vw);
+  grid-template-columns: 1fr;
+  grid-template-areas: "copy";
+  min-height: 0;
+  border-color: #c97b35;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 2px, transparent 3px 27px),
+    linear-gradient(145deg, rgba(77, 37, 22, 0.97), rgba(29, 24, 23, 0.98));
+  box-shadow: inset 0 0 0 3px #3b211b, inset 0 0 48px rgba(18,18,18,0.34), 0 30px 70px rgba(0,0,0,0.58);
+}
+
+.complete-screen[data-outcome="spoiled"] .victory-board {
+  border-color: #779d45;
+  box-shadow: inset 0 0 0 3px #2d3a21, inset 0 0 48px rgba(82,140,45,0.2), 0 30px 70px rgba(0,0,0,0.58);
+}
+
+.complete-screen[data-outcome="burned"] .victory-trophy,
+.complete-screen[data-outcome="spoiled"] .victory-trophy {
+  display: none;
+}
+
+.complete-screen[data-outcome="burned"] .complete-copy,
+.complete-screen[data-outcome="spoiled"] .complete-copy {
+  width: min(650px, 100%);
+  justify-self: center;
+}
+
+.complete-screen[data-outcome="burned"] .complete-copy h1 {
+  color: #ffd19a;
+  text-shadow: 0 4px 0 #6a2119, 0 9px 22px rgba(10,5,3,0.62);
+}
+
+.complete-screen[data-outcome="spoiled"] .complete-copy h1 {
+  color: #e4f2a5;
+  text-shadow: 0 4px 0 #365126, 0 9px 22px rgba(10,5,3,0.62);
+}
+
 @media (max-width: 900px), (max-height: 700px) {
   .complete-screen {
     min-height: calc(100vh - 64px);
@@ -4616,6 +4819,25 @@ main {
 }
 
 @media (max-width: 480px) {
+  .fire-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #heat-down {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .heat-status {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  #heat-up {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
   .victory-board .complete-copy h1 {
     font-size: clamp(36px, 12vw, 50px);
   }
@@ -4628,6 +4850,16 @@ main {
   .victory-board .qr-card {
     padding: 18px 14px;
   }
+}
+
+@keyframes heat-warning {
+  from { filter: drop-shadow(0 0 0 rgba(255, 139, 37, 0)); }
+  to { filter: drop-shadow(0 0 9px rgba(255, 139, 37, 0.68)); }
+}
+
+@keyframes heat-critical {
+  from { filter: drop-shadow(0 0 4px rgba(225, 50, 42, 0.45)); }
+  to { filter: drop-shadow(0 0 13px rgba(225, 50, 42, 0.9)); }
 }
 
 @keyframes mobile-flame {
