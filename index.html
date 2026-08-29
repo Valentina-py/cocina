@@ -63,6 +63,16 @@
           </button>
         </div>
 
+        <button id="open-recipe-guide" class="guide-entry" type="button" aria-haspopup="dialog">
+          <span class="guide-entry-icon" aria-hidden="true">📖</span>
+          <span class="guide-entry-copy">
+            <small>Recetario cultural</small>
+            <strong>Conocé las recetas del NOA</strong>
+            <em>Variaciones regionales, ingredientes y formas de preparación.</em>
+          </span>
+          <span class="guide-entry-action">Explorar recetas <b aria-hidden="true">→</b></span>
+        </button>
+
         <div class="menu-instruction" aria-label="Cómo jugar">
           <span aria-hidden="true">☝</span>
           <p><strong>Tocá o arrastrá</strong> ingredientes de la alacena hacia la preparación.</p>
@@ -147,6 +157,24 @@
       <h2 id="variant-title">Variedades regionales</h2>
       <p id="variant-subtitle"></p>
       <div id="variant-options" class="variant-options"></div>
+    </section>
+  </div>
+
+  <div id="recipe-guide" class="recipe-guide-modal" hidden>
+    <div class="guide-backdrop" data-close-guide></div>
+    <section class="guide-panel" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+      <header class="guide-header">
+        <div>
+          <p class="eyebrow">Sabores, territorio y memoria</p>
+          <h2 id="guide-title">Recetario del NOA</h2>
+        </div>
+        <button id="close-recipe-guide" class="guide-close" type="button" aria-label="Cerrar recetario">×</button>
+      </header>
+
+      <div class="guide-layout">
+        <nav id="guide-tabs" class="guide-tabs" aria-label="Recetas de la región"></nav>
+        <article id="guide-content" class="guide-content" aria-live="polite"></article>
+      </div>
     </section>
   </div>
 

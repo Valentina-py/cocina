@@ -82,6 +82,78 @@ window.KITCHEN_DATA = {
     }
   },
 
+  recipeGuides: {
+    empanadas: {
+      name: "Empanadas regionales",
+      emoji: "🥟",
+      region: "Salta · Tucumán · Córdoba",
+      introduction: "La empanada recorre la Argentina con rellenos, tamaños y repulgues propios. En el NOA, la carne cortada a cuchillo y el horno de barro ocupan un lugar central.",
+      variations: [
+        { name: "Salteña", place: "Salta", detail: "Pequeña y jugosa, con carne, papa, huevo, comino y pimentón." },
+        { name: "Tucumana", place: "Tucumán", detail: "Lleva matambre, verdeo y huevo; se reconoce por sus 13 repulgues y suele acompañarse con limón." },
+        { name: "Cordobesa", place: "Córdoba", detail: "Combina carne, papa y huevo con el contrapunto dulce de las pasas y el azúcar." }
+      ],
+      steps: [
+        "Cortar la carne y las verduras; cocinar el relleno con los condimentos de la variante elegida.",
+        "Dejar enfriar completamente para conservar los jugos y evitar que la masa se humedezca.",
+        "Colocar el relleno sobre los discos, cerrar y realizar el repulgue característico.",
+        "Cocinar en horno fuerte —tradicionalmente de barro— hasta que la masa quede dorada."
+      ],
+      note: "Cada familia guarda proporciones y secretos propios: la guía presenta rasgos reconocibles, no una única receta posible."
+    },
+    humita: {
+      name: "Humita",
+      emoji: "🌽",
+      region: "Salta · Jujuy · Tucumán",
+      introduction: "De raíz prehispánica, la humita transforma choclo rallado y zapallo en una preparación espesa y suave, aromatizada con productos de la huerta.",
+      variations: [
+        { name: "En olla", place: "NOA", detail: "Se cocina y se sirve cremosa en plato, con cebolla, morrón, albahaca y especias." },
+        { name: "En chala", place: "Región andina", detail: "La pasta se envuelve entre dos chalas cruzadas, se ata y se cocina como un pequeño paquete." }
+      ],
+      steps: [
+        "Rallar o procesar los granos de choclo y combinar con zapallo cocido o rallado.",
+        "Rehogar cebolla y morrón; sumar la pasta y cocinar lentamente, revolviendo para que no se pegue.",
+        "Para servir en olla, ajustar la cremosidad y terminar con albahaca, queso o ají según la receta familiar.",
+        "Para hacerla en chala, colocar la pasta en hojas cruzadas, cerrar, atar y hervir en agua con sal."
+      ],
+      note: "La chala no es solo envoltorio: también permite cocinar, conservar la forma y presentar la humita."
+    },
+    locro: {
+      name: "Locro",
+      emoji: "🥘",
+      region: "Noroeste argentino y Cuyo",
+      introduction: "Este guiso comunitario de origen prehispánico reúne maíz blanco, porotos y zapallo. Con el tiempo incorporó carnes y condimentos de distintas tradiciones.",
+      variations: [
+        { name: "Criollo", place: "Noroeste y Cuyo", detail: "Combina maíz, porotos, zapallo, panceta y chorizo colorado en una cocción prolongada." },
+        { name: "De altura", place: "Puna", detail: "Suma charqui y papa, ingredientes ligados a la conservación y a los caminos andinos." }
+      ],
+      steps: [
+        "Remojar por separado el maíz blanco y los porotos desde la noche anterior.",
+        "Iniciar la cocción con abundante agua; incorporar las carnes y retirar la espuma cuando sea necesario.",
+        "Agregar zapallo y cocinar a fuego bajo hasta que se deshaga y espese naturalmente el guiso.",
+        "Servir bien caliente con una salsa de cebolla, pimentón y ají preparada aparte."
+      ],
+      note: "El locro necesita tiempo: la cocción lenta integra sabores y convierte al zapallo en el espesante de la olla."
+    },
+    tamales: {
+      name: "Tamales norteños",
+      emoji: "🫔",
+      region: "Salta · Jujuy · Catamarca · Tucumán",
+      introduction: "Tamal significa “envuelto”. La masa de maíz se combina con zapallo y guarda un relleno condimentado antes de cerrarse en chalas.",
+      variations: [
+        { name: "Norteño", place: "NOA", detail: "Masa de maíz y zapallo con relleno de cerdo, cebolla, huevo, pimentón y ají." },
+        { name: "Agridulce", place: "Recetas familiares", detail: "Incorpora pasas de uva para contrastar el relleno de carne con un matiz dulce." }
+      ],
+      steps: [
+        "Hidratar las chalas secas en agua caliente hasta que sean flexibles y no se quiebren.",
+        "Preparar una masa maleable con harina de maíz, zapallo y condimentos.",
+        "Disponer masa y relleno sobre las chalas, cerrar formando un paquete y atar con una tira de la misma hoja.",
+        "Hervir en abundante agua hasta que el tamal esté firme y la masa completamente cocida."
+      ],
+      note: "La forma de atar, el picante y las proporciones del relleno cambian de una casa a otra."
+    }
+  },
+
   recipes: {
     empanada_saltena: {
       family: "empanadas",

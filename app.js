@@ -43,7 +43,12 @@
     achievementTitle: document.querySelector("#achievement-title"),
     playAgain: document.querySelector("#play-again"),
     qrcode: document.querySelector("#qrcode"),
-    recipeLink: document.querySelector("#recipe-link")
+    recipeLink: document.querySelector("#recipe-link"),
+    openRecipeGuide: document.querySelector("#open-recipe-guide"),
+    recipeGuide: document.querySelector("#recipe-guide"),
+    closeRecipeGuide: document.querySelector("#close-recipe-guide"),
+    guideTabs: document.querySelector("#guide-tabs"),
+    guideContent: document.querySelector("#guide-content")
   };
 
   const state = {
@@ -52,12 +57,14 @@
     variationHistory: [],
     drag: null,
     idleDeadline: 0,
+    idleDuration: DATA.config.inactivityMs,
     idleTimer: null,
     completionTimer: null,
     toastTimer: null,
     sessionActive: false,
     suppressClickUntil: 0,
-    completed: false
+    completed: false,
+    guideId: "empanadas"
   };
 
   function activateScreen(target) {
@@ -114,6 +121,77 @@
       state.sessionActive = false;
       stopIdleTimer();
     }
+  }
+
+  function openRecipeGuide(guideId = state.guideId) {
+    if (!DATA.recipeGuides[guideId]) guideId = "empanadas";
+    state.guideId = guideId;
+    renderRecipeGuide();
+    el.recipeGuide.hidden = false;
+    requestAnimationFrame(() => el.recipeGuide.classList.add("is-open"));
+    state.sessionActive = true;
+    armIdleTimer(120000);
+    requestAnimationFrame(() => el.closeRecipeGuide.focus());
+  }
+
+  function closeRecipeGuide() {
+    el.recipeGuide.classList.remove("is-open");
+    window.setTimeout(() => {
+      if (!el.recipeGuide.classList.contains("is-open")) el.recipeGuide.hidden = true;
+    }, 220);
+
+    if (!state.recipeId) {
+      state.sessionActive = false;
+      stopIdleTimer();
+      el.idleIndicator.hidden = true;
+    }
+  }
+
+  function renderRecipeGuide() {
+    const guides = DATA.recipeGuides;
+    const current = guides[state.guideId];
+    if (!current) return;
+
+    el.guideTabs.replaceChildren();
+    Object.entries(guides).forEach(([id, guide]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "guide-tab";
+      button.dataset.guide = id;
+      button.setAttribute("role", "tab");
+      button.setAttribute("aria-selected", String(id === state.guideId));
+      button.innerHTML = `<span aria-hidden="true">${guide.emoji}</span><strong>${guide.name}</strong>`;
+      el.guideTabs.append(button);
+    });
+
+    const variations = current.variations.map((variation) => `
+      <section class="guide-variation">
+        <strong>${variation.name}</strong>
+        <small>${variation.place}</small>
+        <p>${variation.detail}</p>
+      </section>`).join("");
+
+    const steps = current.steps.map((step) => `<li>${step}</li>`).join("");
+
+    el.guideContent.innerHTML = `
+      <div class="guide-hero">
+        <span class="guide-hero-emoji" aria-hidden="true">${current.emoji}</span>
+        <div><h3>${current.name}</h3><span class="guide-region">${current.region}</span></div>
+      </div>
+      <p class="guide-introduction">${current.introduction}</p>
+      <div class="guide-columns">
+        <section>
+          <h4 class="guide-section-title"><span aria-hidden="true">◆</span> Variaciones regionales</h4>
+          <div class="guide-variations">${variations}</div>
+        </section>
+        <section>
+          <h4 class="guide-section-title"><span aria-hidden="true">◆</span> Preparación</h4>
+          <ol class="guide-steps">${steps}</ol>
+        </section>
+      </div>
+      <p class="guide-note"><span aria-hidden="true">✦</span>${current.note}</p>`;
+
+    el.guideContent.scrollTop = 0;
   }
 
   function startRecipe(recipeId) {
@@ -404,6 +482,7 @@
     cancelDrag();
     hideToast();
     closeFamily();
+    closeRecipeGuide();
 
     state.recipeId = null;
     state.added = new Set();
@@ -425,9 +504,10 @@
     }
   }
 
-  function armIdleTimer() {
+  function armIdleTimer(durationMs = DATA.config.inactivityMs) {
     if (!state.sessionActive) return;
-    state.idleDeadline = Date.now() + DATA.config.inactivityMs;
+    state.idleDuration = durationMs;
+    state.idleDeadline = Date.now() + state.idleDuration;
     el.idleIndicator.hidden = false;
     if (!state.idleTimer) state.idleTimer = window.setInterval(updateIdleTimer, 250);
     updateIdleTimer();
@@ -435,7 +515,7 @@
 
   function noteActivity() {
     if (state.sessionActive) {
-      state.idleDeadline = Date.now() + DATA.config.inactivityMs;
+      state.idleDeadline = Date.now() + state.idleDuration;
       updateIdleTimer();
     }
   }
@@ -538,6 +618,19 @@
     if (event.target.closest("[data-close-modal]")) closeFamily();
   });
 
+  el.openRecipeGuide.addEventListener("click", () => openRecipeGuide());
+  el.closeRecipeGuide.addEventListener("click", closeRecipeGuide);
+  el.recipeGuide.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-guide]")) closeRecipeGuide();
+  });
+  el.guideTabs.addEventListener("click", (event) => {
+    const tab = event.target.closest("[data-guide]");
+    if (!tab) return;
+    state.guideId = tab.dataset.guide;
+    renderRecipeGuide();
+    noteActivity();
+  });
+
   el.ingredientGrid.addEventListener("pointerdown", beginDrag);
   el.ingredientGrid.addEventListener("click", (event) => {
     if (Date.now() < state.suppressClickUntil) return;
@@ -556,7 +649,8 @@
   document.addEventListener("pointerdown", noteActivity, { capture: true });
   document.addEventListener("keydown", (event) => {
     noteActivity();
-    if (event.key === "Escape" && !el.variantDialog.hidden) closeFamily();
+    if (event.key === "Escape" && !el.recipeGuide.hidden) closeRecipeGuide();
+    else if (event.key === "Escape" && !el.variantDialog.hidden) closeFamily();
   });
 
   el.homeButton.addEventListener("click", () => resetToMenu());
@@ -568,7 +662,8 @@
   document.addEventListener("gesturestart", (event) => event.preventDefault());
   document.addEventListener("touchmove", (event) => {
     const standMode = window.matchMedia("(pointer: coarse) and (min-width: 700px)").matches;
-    if (standMode) event.preventDefault();
+    const guideIsScrolling = event.target.closest?.(".guide-content");
+    if (standMode && !guideIsScrolling) event.preventDefault();
   }, { passive: false });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) noteActivity();
