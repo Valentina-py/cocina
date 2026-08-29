@@ -1571,6 +1571,11 @@ main {
 .heat-lines i:nth-child(2) { height: 42px; animation-delay: -0.8s; }
 .heat-lines i:nth-child(3) { animation-delay: -1.4s; }
 
+.heat-meter,
+.wood-fire {
+  display: none;
+}
+
 .vessel {
   width: min(78%, 380px);
   height: clamp(128px, 23vh, 205px);
@@ -3728,6 +3733,363 @@ main {
       radial-gradient(ellipse at 63% 24%, #4b2d20 0 1.2px, transparent 1.7px),
       linear-gradient(145deg, #ffd26a 0%, #e49a25 72%);
   }
+}
+
+/* Escenario 9:16 inspirado en Salta y la selva de Yungas. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .topbar {
+    background: linear-gradient(105deg, rgba(47, 24, 13, 0.98), rgba(105, 48, 24, 0.97));
+    border-bottom-color: rgba(255, 197, 94, 0.3);
+  }
+
+  .game-screen {
+    gap: 0;
+    padding: 0 8px 24px;
+    position: relative;
+    background-image:
+      linear-gradient(rgba(52, 25, 10, 0.18), rgba(49, 21, 9, 0.34)),
+      url("assets/mesa-yungas-mobile.jpg");
+    background-position: center top;
+    background-size: 100% auto;
+  }
+
+  .mobile-game-nav {
+    order: -4;
+    margin-inline: -8px;
+    background: rgba(53, 26, 14, 0.96);
+  }
+
+  .cook-zone {
+    min-height: 510px;
+    order: -3;
+    grid-template-rows: auto 1fr auto;
+    gap: 8px;
+    margin-top: 0;
+    padding: 18px 10px 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 214, 131, 0.32);
+    border-top: 0;
+    border-radius: 0 0 30px 30px;
+    background:
+      linear-gradient(180deg, rgba(88, 40, 17, 0.38), rgba(56, 25, 12, 0.58)),
+      radial-gradient(circle at 50% 52%, rgba(255, 177, 58, 0.24), transparent 48%);
+    box-shadow: 0 18px 34px rgba(38, 17, 7, 0.35), inset 0 0 40px rgba(255, 178, 62, 0.08);
+  }
+
+  .cook-heading {
+    position: relative;
+    z-index: 4;
+  }
+
+  .cook-heading .eyebrow {
+    color: #ffd276;
+  }
+
+  .cook-heading h2 {
+    color: #fff4d8;
+    font-size: clamp(31px, 9vw, 40px);
+    text-shadow: 0 3px 0 #73331c, 0 7px 18px rgba(39, 15, 5, 0.48);
+  }
+
+  .drop-zone {
+    min-height: 350px;
+    overflow: visible;
+    border: 0;
+    border-radius: 24px;
+    background:
+      radial-gradient(ellipse at 50% 68%, rgba(255, 137, 37, 0.3), transparent 34%),
+      radial-gradient(circle at 50% 48%, rgba(47, 20, 9, 0.25), transparent 58%);
+  }
+
+  .drop-zone.is-ready,
+  .drop-zone.is-over {
+    border: 0;
+    background:
+      radial-gradient(ellipse at 50% 68%, rgba(255, 164, 53, 0.43), transparent 38%),
+      radial-gradient(circle at 50% 48%, rgba(47, 20, 9, 0.22), transparent 58%);
+  }
+
+  .heat-lines {
+    top: 2%;
+    z-index: 3;
+  }
+
+  .heat-meter {
+    --heat-level: 0%;
+    width: 45px;
+    height: 205px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 58px;
+    right: 5px;
+    z-index: 5;
+    padding: 10px 7px 8px;
+    border: 3px solid #4c2717;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #c27a3f, #6f351d);
+    box-shadow: inset 0 0 0 2px rgba(255, 223, 151, 0.35), 0 9px 17px rgba(34, 14, 5, 0.38);
+  }
+
+  .heat-meter-track {
+    width: 17px;
+    height: 154px;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #f5d69b;
+    border-radius: 12px 12px 7px 7px;
+    background: linear-gradient(to top, #55ad39 0 24%, #c7d52a 24% 47%, #ffbd29 47% 70%, #f26827 70% 86%, #c72f30 86% 100%);
+    box-shadow: inset 0 0 7px rgba(42, 18, 5, 0.5);
+  }
+
+  .heat-meter-track::after {
+    content: "";
+    height: calc(100% - var(--heat-level));
+    position: absolute;
+    inset: 0 0 auto;
+    background: rgba(54, 31, 17, 0.72);
+    backdrop-filter: saturate(0.35);
+    transition: height 450ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .heat-meter-level {
+    width: 100%;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    background: rgba(255, 244, 192, 0.22);
+    box-shadow: 0 -3px 9px #fff0a4;
+    transition: height 450ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .heat-meter-bulb {
+    width: 29px;
+    height: 29px;
+    margin-top: -4px;
+    position: relative;
+    z-index: 3;
+    border: 4px solid #f5d69b;
+    border-radius: 50%;
+    background: #4ca738;
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,0.22), 0 2px 6px rgba(35,14,6,0.4);
+  }
+
+  .wood-fire {
+    width: 180px;
+    height: 92px;
+    display: block;
+    position: absolute;
+    top: 61%;
+    left: 50%;
+    z-index: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 10px 9px rgba(48, 17, 5, 0.52));
+  }
+
+  .drop-zone:not([data-vessel="pot"]) .wood-fire {
+    display: none;
+  }
+
+  .flame {
+    width: 48px;
+    height: 70px;
+    position: absolute;
+    left: 65px;
+    bottom: 20px;
+    border-radius: 70% 30% 62% 38%;
+    background: linear-gradient(135deg, #fff178 12%, #ffb02d 48%, #ed5b26 78%);
+    box-shadow: 0 0 24px rgba(255, 137, 31, 0.66);
+    transform: rotate(45deg);
+    transform-origin: 50% 85%;
+    animation: mobile-flame 720ms ease-in-out infinite alternate;
+  }
+
+  .flame-one {
+    width: 37px;
+    height: 54px;
+    left: 42px;
+    bottom: 17px;
+    animation-delay: -240ms;
+  }
+
+  .flame-three {
+    width: 35px;
+    height: 50px;
+    left: 96px;
+    bottom: 18px;
+    animation-delay: -430ms;
+  }
+
+  .log {
+    width: 112px;
+    height: 20px;
+    position: absolute;
+    left: 34px;
+    bottom: 7px;
+    border: 4px solid #4b2818;
+    border-radius: 13px;
+    background: repeating-linear-gradient(90deg, #92502b 0 13px, #6d351e 14px 18px);
+    box-shadow: inset 0 3px 0 rgba(255, 198, 112, 0.16);
+  }
+
+  .log-one { transform: rotate(10deg); }
+  .log-two { transform: rotate(-10deg); }
+
+  .vessel {
+    width: min(68%, 270px);
+    height: 150px;
+    z-index: 2;
+    margin-right: 20px;
+  }
+
+  .vessel--pot {
+    border-color: #512817;
+    border-top-color: #3f2015;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 29px, rgba(255, 214, 129, 0.11) 30px 33px),
+      linear-gradient(145deg, #8c3e24, #d36c39 48%, #76301f);
+    box-shadow: inset 0 -20px 24px rgba(67, 20, 8, 0.3), 0 19px 21px rgba(40, 15, 5, 0.44);
+  }
+
+  .vessel--board,
+  .vessel--bowl {
+    width: min(72%, 285px);
+    margin-right: 15px;
+  }
+
+  .drop-instruction {
+    max-width: 82%;
+    z-index: 4;
+    padding: 7px 11px;
+    border: 1px solid rgba(255, 220, 153, 0.24);
+    border-radius: 18px;
+    background: rgba(55, 24, 11, 0.72);
+    font-size: 10px;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .added-chips {
+    max-width: 92%;
+    z-index: 4;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .progress-card {
+    position: relative;
+    z-index: 4;
+    border-color: rgba(255, 217, 141, 0.26);
+    background: rgba(62, 28, 13, 0.8);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.09);
+  }
+
+  .progress-track {
+    height: 10px;
+    background: rgba(25, 11, 5, 0.52);
+  }
+
+  .progress-track span {
+    background: linear-gradient(90deg, #54a938, #d0d52c 42%, #ffb128 72%, #e75c2e);
+  }
+
+  .pantry {
+    min-height: 0;
+    order: -2;
+    margin-top: 12px;
+    padding: 19px 11px 22px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 219, 147, 0.26);
+    border-radius: 26px;
+    background: linear-gradient(160deg, rgba(47, 24, 13, 0.94), rgba(88, 42, 20, 0.92));
+    box-shadow: 0 15px 28px rgba(43, 17, 7, 0.32), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .pantry .panel-heading {
+    min-height: 46px;
+    margin-bottom: 11px;
+    align-items: center;
+  }
+
+  .pantry .panel-heading h2 {
+    color: #fff0d0;
+    font-size: 28px;
+  }
+
+  .touch-hint {
+    max-width: none;
+    color: #3b2115;
+    background: #f3c263;
+  }
+
+  .ingredient-grid {
+    height: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 90px);
+    gap: 7px;
+  }
+
+  .ingredient-token {
+    padding: 6px 3px;
+    border: 2px solid #6c3b22;
+    border-radius: 18px;
+    color: #3b2115;
+    background: linear-gradient(150deg, #f3ca83, #bd7b3f);
+    box-shadow: inset 0 2px 0 rgba(255,244,206,0.42), inset 0 -5px 0 rgba(92,42,19,0.2), 0 5px 9px rgba(35,14,5,0.28);
+  }
+
+  .ingredient-token span {
+    font-size: 29px;
+  }
+
+  .ingredient-token strong {
+    color: #321b12;
+    font-size: 9px;
+  }
+
+  .ingredient-token small {
+    display: none;
+  }
+
+  .ingredient-token.is-added {
+    opacity: 1;
+    border-color: #86aa4a;
+    color: #f6f0d1;
+    background: linear-gradient(150deg, #55783e, #355a36);
+  }
+
+  .ingredient-token.is-added strong {
+    color: #fff7db;
+  }
+
+  .order {
+    min-height: 0;
+    order: -1;
+    margin-top: 12px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 219, 147, 0.25);
+    border-radius: 26px;
+    background: rgba(49, 23, 12, 0.66);
+    box-shadow: 0 16px 30px rgba(38, 14, 5, 0.32);
+  }
+
+  .order-paper {
+    min-height: 0;
+    border-radius: 24px;
+    background:
+      linear-gradient(90deg, transparent 25px, rgba(186,74,48,0.16) 26px 27px, transparent 28px),
+      repeating-linear-gradient(0deg, transparent 0 31px, rgba(98,66,44,0.09) 32px 33px),
+      #fff2d2;
+  }
+}
+
+@keyframes mobile-flame {
+  from { transform: rotate(41deg) scale(0.9, 1); opacity: 0.84; }
+  to { transform: rotate(49deg) scale(1.08, 0.94); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

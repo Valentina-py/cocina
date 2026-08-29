@@ -27,6 +27,8 @@
     cookTitle: document.querySelector("#cook-title"),
     progressLabel: document.querySelector("#progress-label"),
     progressBar: document.querySelector("#progress-bar"),
+    heatMeter: document.querySelector("#heat-meter"),
+    heatLevel: document.querySelector("#heat-level"),
     fullscreenToggle: document.querySelector("#fullscreen-toggle"),
     fullscreenIcon: document.querySelector("#fullscreen-icon"),
     fullscreenLabel: document.querySelector("#fullscreen-label"),
@@ -619,6 +621,10 @@
     const percent = total ? Math.round((completed / total) * 100) : 0;
     el.progressLabel.textContent = `${completed} de ${total}`;
     el.progressBar.style.width = `${percent}%`;
+    el.heatMeter.style.setProperty("--heat-level", `${percent}%`);
+    el.heatMeter.setAttribute("aria-valuenow", String(percent));
+    el.heatMeter.setAttribute("aria-valuetext", `${percent}% de avance de cocción`);
+    el.heatLevel.style.height = `${Math.max(percent, 8)}%`;
   }
 
   function addIngredient(id) {

@@ -10,7 +10,7 @@
   <meta name="description" content="Simulador táctil y educativo de cocina del Noroeste Argentino.">
   <title>Fogón del NOA · Cocina regional interactiva</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260829-2">
+  <link rel="stylesheet" href="styles.css?v=20260829-3">
 </head>
 <body>
   <div class="orientation-guard" role="status" aria-live="polite">
@@ -132,6 +132,14 @@
 
           <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Recipiente de preparación; elegí un ingrediente de la alacena">
             <div class="heat-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div id="heat-meter" class="heat-meter" role="progressbar" aria-label="Temperatura del fogón" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="heat-meter-track" aria-hidden="true"><span id="heat-level" class="heat-meter-level"></span></div>
+              <div class="heat-meter-bulb" aria-hidden="true"></div>
+            </div>
+            <div class="wood-fire" aria-hidden="true">
+              <span class="flame flame-one"></span><span class="flame flame-two"></span><span class="flame flame-three"></span>
+              <i class="log log-one"></i><i class="log log-two"></i>
+            </div>
             <div id="vessel" class="vessel vessel--pot" aria-hidden="true">
               <div class="vessel-content" id="vessel-content"></div>
               <div class="vessel-rim"></div>
@@ -216,7 +224,7 @@
     </div>
   </div>
 
-  <script src="recipes.js?v=20260829-2"></script>
-  <script src="app.js?v=20260829-2"></script>
+  <script src="recipes.js?v=20260829-3"></script>
+  <script src="app.js?v=20260829-3"></script>
 </body>
 </html>
