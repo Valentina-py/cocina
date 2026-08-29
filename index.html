@@ -22,12 +22,18 @@
         <span><strong>Fogón del NOA</strong><small>Cocina, territorio y memoria</small></span>
       </button>
 
-      <div id="session-status" class="session-status" aria-live="polite">
-        <span id="status-text">Elegí una receta para comenzar</span>
-        <span id="idle-indicator" class="idle-indicator" hidden>
-          <span>Reinicio</span>
-          <strong id="idle-seconds">40 s</strong>
-        </span>
+      <div class="topbar-tools">
+        <button id="sound-toggle" class="sound-toggle is-on" type="button" aria-pressed="true" aria-label="Silenciar música y efectos">
+          <span id="sound-icon" class="sound-icon" aria-hidden="true">♫</span>
+          <span id="sound-label">Sonido</span>
+        </button>
+        <div id="session-status" class="session-status" aria-live="polite">
+          <span id="status-text">Elegí una receta para comenzar</span>
+          <span id="idle-indicator" class="idle-indicator" hidden>
+            <span>Reinicio</span>
+            <strong id="idle-seconds">40 s</strong>
+          </span>
+        </div>
       </div>
     </header>
 

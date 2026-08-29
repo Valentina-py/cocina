@@ -26,6 +26,9 @@
     cookTitle: document.querySelector("#cook-title"),
     progressLabel: document.querySelector("#progress-label"),
     progressBar: document.querySelector("#progress-bar"),
+    soundToggle: document.querySelector("#sound-toggle"),
+    soundIcon: document.querySelector("#sound-icon"),
+    soundLabel: document.querySelector("#sound-label"),
     sessionStatus: document.querySelector("#session-status"),
     statusText: document.querySelector("#status-text"),
     idleIndicator: document.querySelector("#idle-indicator"),
@@ -64,6 +67,30 @@
     suppressClickUntil: 0,
     completed: false
   };
+
+  const audioState = {
+    context: null,
+    master: null,
+    music: null,
+    effects: null,
+    noiseBuffer: null,
+    enabled: true,
+    sequenceTimer: null,
+    nextStepAt: 0,
+    step: 0
+  };
+
+  const CHIPTUNE_STEP_SECONDS = 0.16;
+  const CHIPTUNE_SEQUENCE = [
+    { lead: 69, bass: 45 }, { lead: 72 }, { lead: 76 }, { lead: null },
+    { lead: 74, bass: 40 }, { lead: 72 }, { lead: 69 }, { lead: 67 },
+    { lead: 64, bass: 41 }, { lead: 67 }, { lead: 71 }, { lead: 69 },
+    { lead: 67, bass: 43 }, { lead: 64 }, { lead: 62 }, { lead: null },
+    { lead: 69, bass: 45 }, { lead: 71 }, { lead: 72 }, { lead: 76 },
+    { lead: 79, bass: 40 }, { lead: 76 }, { lead: 74 }, { lead: 72 },
+    { lead: 74, bass: 41 }, { lead: 72 }, { lead: 69 }, { lead: 67 },
+    { lead: 64, bass: 43 }, { lead: 67 }, { lead: 69 }, { lead: null }
+  ];
 
   function activateScreen(target) {
     screens.forEach((screen) => {
@@ -107,6 +134,186 @@
     document.addEventListener("mouseup", () => el.yaguareteCursor.classList.remove("is-pressing"));
     document.documentElement.addEventListener("mouseleave", () => el.yaguareteCursor.classList.remove("is-visible"));
     window.addEventListener("blur", () => el.yaguareteCursor.classList.remove("is-visible", "is-pressing"));
+  }
+
+  function noteFrequency(midiNote) {
+    return 440 * (2 ** ((midiNote - 69) / 12));
+  }
+
+  function ensureAudio() {
+    if (audioState.context) return audioState.context;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      audioState.enabled = false;
+      updateSoundButton("Audio no disponible");
+      el.soundToggle.disabled = true;
+      return null;
+    }
+
+    const context = new AudioContextClass();
+    const master = context.createGain();
+    const music = context.createGain();
+    const effects = context.createGain();
+
+    master.gain.value = 0.72;
+    music.gain.value = 0.22;
+    effects.gain.value = 0.48;
+    music.connect(master);
+    effects.connect(master);
+    master.connect(context.destination);
+
+    audioState.context = context;
+    audioState.master = master;
+    audioState.music = music;
+    audioState.effects = effects;
+    return context;
+  }
+
+  function scheduleTone({ frequency, start, duration, type = "square", volume = 0.08, destination }) {
+    const context = audioState.context;
+    if (!context || !destination) return;
+    const oscillator = context.createOscillator();
+    const envelope = context.createGain();
+    const attackEnd = start + Math.min(0.012, duration * 0.2);
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, start);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.exponentialRampToValueAtTime(volume, attackEnd);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(envelope);
+    envelope.connect(destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.02);
+  }
+
+  function scheduleMusicStep(stepIndex, start) {
+    const step = CHIPTUNE_SEQUENCE[stepIndex];
+    if (step.lead) {
+      scheduleTone({
+        frequency: noteFrequency(step.lead),
+        start,
+        duration: CHIPTUNE_STEP_SECONDS * 0.78,
+        type: "square",
+        volume: 0.075,
+        destination: audioState.music
+      });
+    }
+    if (step.bass) {
+      scheduleTone({
+        frequency: noteFrequency(step.bass),
+        start,
+        duration: CHIPTUNE_STEP_SECONDS * 3.2,
+        type: "triangle",
+        volume: 0.095,
+        destination: audioState.music
+      });
+    }
+    if (stepIndex % 4 === 2 && step.lead) {
+      scheduleTone({
+        frequency: noteFrequency(step.lead - 12),
+        start: start + 0.018,
+        duration: CHIPTUNE_STEP_SECONDS * 0.48,
+        type: "square",
+        volume: 0.025,
+        destination: audioState.music
+      });
+    }
+  }
+
+  function scheduleChiptune() {
+    const context = audioState.context;
+    if (!context || !audioState.enabled) return;
+    while (audioState.nextStepAt < context.currentTime + 0.28) {
+      scheduleMusicStep(audioState.step, audioState.nextStepAt);
+      audioState.step = (audioState.step + 1) % CHIPTUNE_SEQUENCE.length;
+      audioState.nextStepAt += CHIPTUNE_STEP_SECONDS;
+    }
+  }
+
+  function startChiptune() {
+    const context = ensureAudio();
+    if (!context || !audioState.enabled || audioState.sequenceTimer) return;
+    const begin = () => {
+      audioState.music.gain.cancelScheduledValues(context.currentTime);
+      audioState.music.gain.setTargetAtTime(0.22, context.currentTime, 0.04);
+      audioState.nextStepAt = context.currentTime + 0.06;
+      scheduleChiptune();
+      audioState.sequenceTimer = window.setInterval(scheduleChiptune, 90);
+    };
+    if (context.state === "suspended") {
+      context.resume().then(begin).catch(() => {});
+    } else {
+      begin();
+    }
+  }
+
+  function stopChiptune() {
+    window.clearInterval(audioState.sequenceTimer);
+    audioState.sequenceTimer = null;
+    if (audioState.context && audioState.music) {
+      audioState.music.gain.cancelScheduledValues(audioState.context.currentTime);
+      audioState.music.gain.setTargetAtTime(0.0001, audioState.context.currentTime, 0.025);
+    }
+  }
+
+  function updateSoundButton(forcedLabel = "") {
+    if (!el.soundToggle) return;
+    const active = audioState.enabled;
+    el.soundToggle.classList.toggle("is-on", active);
+    el.soundToggle.classList.toggle("is-muted", !active);
+    el.soundToggle.setAttribute("aria-pressed", String(active));
+    el.soundToggle.setAttribute("aria-label", forcedLabel || (active ? "Silenciar música y efectos" : "Activar música y efectos"));
+    el.soundIcon.textContent = active ? "♫" : "×";
+    el.soundLabel.textContent = active ? "Sonido" : "Silenciado";
+  }
+
+  function toggleSound() {
+    audioState.enabled = !audioState.enabled;
+    updateSoundButton();
+    if (audioState.enabled) startChiptune();
+    else stopChiptune();
+  }
+
+  function playIngredientSound(vesselType) {
+    if (!audioState.enabled) return;
+    const context = ensureAudio();
+    if (!context) return;
+    const now = context.currentTime + 0.01;
+    const tones = vesselType === "board"
+      ? [196, 294]
+      : vesselType === "pot"
+        ? [247, 370]
+        : [392, 587];
+
+    scheduleTone({ frequency: tones[0], start: now, duration: 0.075, type: "square", volume: 0.13, destination: audioState.effects });
+    scheduleTone({ frequency: tones[1], start: now + 0.035, duration: 0.11, type: "triangle", volume: 0.1, destination: audioState.effects });
+  }
+
+  function playErrorSound() {
+    if (!audioState.enabled) return;
+    const context = ensureAudio();
+    if (!context) return;
+    const now = context.currentTime + 0.01;
+    scheduleTone({ frequency: 155, start: now, duration: 0.12, type: "sawtooth", volume: 0.1, destination: audioState.effects });
+    scheduleTone({ frequency: 116, start: now + 0.13, duration: 0.15, type: "sawtooth", volume: 0.085, destination: audioState.effects });
+  }
+
+  function playSuccessSound() {
+    if (!audioState.enabled) return;
+    const context = ensureAudio();
+    if (!context) return;
+    const now = context.currentTime + 0.02;
+    [69, 72, 76, 81].forEach((note, index) => {
+      scheduleTone({
+        frequency: noteFrequency(note),
+        start: now + index * 0.095,
+        duration: 0.18,
+        type: "square",
+        volume: 0.1,
+        destination: audioState.effects
+      });
+    });
   }
 
   function openFamily(familyId) {
@@ -336,6 +543,7 @@
     }
 
     state.added.add(id);
+    playIngredientSound(current.vessel);
     spawnIngredientBurst(id);
 
     if (variation && DATA.recipes[variation.target]) {
@@ -385,6 +593,7 @@
     const familyReasons = DATA.rejectionReasons[current.family] || {};
     const explanation = familyReasons[id] || familyReasons.default || "No figura en la comanda de esta versión.";
 
+    playErrorSound();
     el.toastTitle.textContent = "Ese ingrediente no va en esta receta";
     el.toastMessage.textContent = `${rejected.name} marca error en ${current.name}. ${explanation} No perdiste ningún avance.`;
     el.dropZone.classList.remove("is-rejected");
@@ -437,6 +646,7 @@
 
   function completeRecipe() {
     state.completed = true;
+    playSuccessSound();
     hideToast();
     stopIdleTimer();
     const current = recipe();
@@ -676,6 +886,7 @@
   document.addEventListener("pointercancel", cancelDrag);
   document.addEventListener("pointerdown", noteActivity, { capture: true });
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") startChiptune();
     noteActivity();
     if (event.key === "Escape" && !el.variantDialog.hidden) closeFamily();
   });
@@ -683,6 +894,9 @@
   el.homeButton.addEventListener("click", () => resetToMenu());
   el.playAgain.addEventListener("click", () => resetToMenu());
   el.toastClose.addEventListener("click", hideToast);
+  el.soundToggle.addEventListener("click", toggleSound);
+
+  document.addEventListener("pointerdown", startChiptune, { capture: true });
 
   document.addEventListener("contextmenu", (event) => event.preventDefault());
   document.addEventListener("dragstart", (event) => event.preventDefault());
@@ -696,6 +910,7 @@
     if (!document.hidden) noteActivity();
   });
 
+  updateSoundButton();
   initYaguareteCursor();
   renderCookbook();
   resetToMenu();

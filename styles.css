@@ -148,6 +148,67 @@ a:focus-visible,
   text-transform: uppercase;
 }
 
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.sound-toggle {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 7px;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
+  color: #eadcc4;
+  background: rgba(255,255,255,0.055);
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 160ms ease, border-color 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+  border-color: rgba(255, 211, 107, 0.65);
+  background: rgba(255, 211, 107, 0.12);
+}
+
+.sound-toggle:active {
+  transform: scale(0.96);
+}
+
+.sound-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #392318;
+  background: #ffd36b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1;
+  box-shadow: inset 0 -2px 0 rgba(113, 61, 25, 0.18);
+}
+
+.sound-toggle.is-muted {
+  opacity: 0.66;
+}
+
+.sound-toggle.is-muted .sound-icon {
+  color: #eadcc4;
+  background: rgba(255,255,255,0.12);
+}
+
+.sound-toggle:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .session-status {
   min-height: 46px;
   display: flex;
@@ -2757,8 +2818,20 @@ main {
 
   .brand-button small,
   #status-text,
-  .idle-indicator span {
+  .idle-indicator span,
+  #sound-label {
     display: none;
+  }
+
+  .topbar-tools {
+    gap: 4px;
+  }
+
+  .sound-toggle {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 5px;
   }
 
   .session-status {
