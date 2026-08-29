@@ -1,0 +1,13 @@
+{
+  "name": "Fogón del NOA · Cocina regional interactiva",
+  "short_name": "Fogón del NOA",
+  "description": "Simulador táctil y educativo de cocina del Noroeste Argentino.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#2b1a12",
+  "theme_color": "#2b1a12",
+  "lang": "es-AR"
+}

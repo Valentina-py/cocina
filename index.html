@@ -4,9 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#2b1a12">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Simulador táctil y educativo de cocina del Noroeste Argentino.">
   <title>Fogón del NOA · Cocina regional interactiva</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css?v=20260829-2">
 </head>
 <body>
   <div class="orientation-guard" role="status" aria-live="polite">
@@ -23,6 +27,10 @@
       </button>
 
       <div class="topbar-tools">
+        <button id="fullscreen-toggle" class="sound-toggle fullscreen-toggle" type="button" aria-label="Abrir en pantalla completa">
+          <span id="fullscreen-icon" class="sound-icon" aria-hidden="true">⛶</span>
+          <span id="fullscreen-label">Pantalla completa</span>
+        </button>
         <button id="sound-toggle" class="sound-toggle is-on" type="button" aria-pressed="true" aria-label="Silenciar música y efectos">
           <span id="sound-icon" class="sound-icon" aria-hidden="true">♫</span>
           <span id="sound-label">Sonido</span>
@@ -102,15 +110,21 @@
       </section>
 
       <section id="game-screen" class="screen game-screen" aria-label="Mesa de cocina interactiva" hidden>
-        <aside class="pantry panel" aria-labelledby="pantry-title">
+        <nav id="mobile-game-nav" class="mobile-game-nav" aria-label="Ir a una parte de la preparación">
+          <button type="button" data-game-jump="pantry-panel"><span aria-hidden="true">1</span> Alacena</button>
+          <button type="button" data-game-jump="cook-panel"><span aria-hidden="true">2</span> Preparación</button>
+          <button type="button" data-game-jump="order-panel"><span aria-hidden="true">3</span> Receta</button>
+        </nav>
+
+        <aside id="pantry-panel" class="pantry panel" aria-labelledby="pantry-title">
           <div class="panel-heading">
             <div><p class="eyebrow">Paso 1</p><h2 id="pantry-title">La alacena</h2></div>
-            <span class="touch-hint" aria-hidden="true">Tocá o arrastrá</span>
+            <span class="touch-hint" aria-hidden="true">Tocá para agregar</span>
           </div>
           <div id="ingredient-grid" class="ingredient-grid"></div>
         </aside>
 
-        <section class="cook-zone" aria-labelledby="cook-title">
+        <section id="cook-panel" class="cook-zone" aria-labelledby="cook-title">
           <div class="cook-heading">
             <p class="eyebrow">Paso 2 · Prepará</p>
             <h2 id="cook-title">Al fuego</h2>
@@ -132,7 +146,7 @@
           </div>
         </section>
 
-        <aside class="order panel" aria-labelledby="order-title">
+        <aside id="order-panel" class="order panel" aria-labelledby="order-title">
           <div class="order-paper">
             <div class="order-pin" aria-hidden="true"></div>
             <p class="eyebrow">Paso 3 · Comanda</p>
@@ -202,7 +216,7 @@
     </div>
   </div>
 
-  <script src="recipes.js"></script>
-  <script src="app.js"></script>
+  <script src="recipes.js?v=20260829-2"></script>
+  <script src="app.js?v=20260829-2"></script>
 </body>
 </html>

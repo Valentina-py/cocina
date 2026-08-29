@@ -9,6 +9,7 @@
     menuScreen: document.querySelector("#menu-screen"),
     gameScreen: document.querySelector("#game-screen"),
     completeScreen: document.querySelector("#complete-screen"),
+    mobileGameNav: document.querySelector("#mobile-game-nav"),
     dishMenu: document.querySelector("#dish-menu"),
     menuNotice: document.querySelector("#menu-notice"),
     ingredientGrid: document.querySelector("#ingredient-grid"),
@@ -26,6 +27,9 @@
     cookTitle: document.querySelector("#cook-title"),
     progressLabel: document.querySelector("#progress-label"),
     progressBar: document.querySelector("#progress-bar"),
+    fullscreenToggle: document.querySelector("#fullscreen-toggle"),
+    fullscreenIcon: document.querySelector("#fullscreen-icon"),
+    fullscreenLabel: document.querySelector("#fullscreen-label"),
     soundToggle: document.querySelector("#sound-toggle"),
     soundIcon: document.querySelector("#sound-icon"),
     soundLabel: document.querySelector("#sound-label"),
@@ -279,6 +283,54 @@
     else stopChiptune();
   }
 
+  function fullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+
+  function updateFullscreenButton() {
+    if (!el.fullscreenToggle) return;
+    const supported = Boolean(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+    if (!supported) {
+      el.fullscreenToggle.hidden = true;
+      return;
+    }
+    const active = Boolean(fullscreenElement());
+    el.fullscreenToggle.hidden = false;
+    el.fullscreenToggle.classList.toggle("is-on", active);
+    el.fullscreenToggle.setAttribute("aria-label", active ? "Salir de pantalla completa" : "Abrir en pantalla completa");
+    el.fullscreenIcon.textContent = active ? "×" : "⛶";
+    el.fullscreenLabel.textContent = active ? "Salir" : "Pantalla completa";
+  }
+
+  function enterFullscreenMode() {
+    if (fullscreenElement()) return;
+    const root = document.documentElement;
+    const request = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (!request) return;
+    try {
+      const pending = request.call(root, { navigationUI: "hide" });
+      pending?.catch(() => {});
+    } catch (_) {
+      try {
+        const fallback = request.call(root);
+        fallback?.catch(() => {});
+      } catch (_) {}
+    }
+  }
+
+  function toggleFullscreenMode() {
+    if (!fullscreenElement()) {
+      enterFullscreenMode();
+      return;
+    }
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!exit) return;
+    try {
+      const pending = exit.call(document);
+      pending?.catch(() => {});
+    } catch (_) {}
+  }
+
   function playIngredientSound(vesselType) {
     if (!audioState.enabled) return;
     const context = ensureAudio();
@@ -338,6 +390,13 @@
     const behavior = reducedMotion ? "auto" : "smooth";
     window.scrollTo({ top: 0, left: 0, behavior });
     el.menuScreen.scrollTo({ top: 0, left: 0, behavior });
+  }
+
+  function jumpToGameSection(targetId) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
   }
 
   function openFamily(familyId) {
@@ -459,6 +518,10 @@
   function startRecipe(recipeId) {
     if (!DATA.recipes[recipeId]) return;
 
+    if (window.matchMedia("(pointer: coarse), (max-width: 700px), (max-width: 1400px) and (max-height: 700px)").matches) {
+      enterFullscreenMode();
+    }
+
     closeFamily();
     state.recipeId = recipeId;
     state.added = new Set();
@@ -523,7 +586,12 @@
   function renderVessel(current) {
     el.vessel.className = `vessel vessel--${current.vessel}`;
     el.dropZone.dataset.vessel = current.vessel;
-    el.dropInstruction.textContent = state.added.size ? "Tocá de nuevo un ingrediente para quitarlo" : "Soltá aquí los ingredientes";
+    const touchDevice = window.matchMedia("(pointer: coarse)").matches;
+    el.dropInstruction.textContent = state.added.size
+      ? "Tocá de nuevo un ingrediente para quitarlo"
+      : touchDevice
+        ? "Tocá un ingrediente de la alacena para agregarlo"
+        : "Soltá aquí los ingredientes";
     el.vesselContent.replaceChildren();
     el.addedChips.replaceChildren();
 
@@ -807,8 +875,7 @@
     const button = event.target.closest("[data-ingredient]");
     if (!button || !state.recipeId) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    const scrollablePhone = window.matchMedia("(max-width: 699px), (max-width: 960px) and (max-height: 540px)").matches;
-    if (scrollablePhone && event.pointerType !== "mouse") return;
+    if (event.pointerType !== "mouse") return;
 
     event.preventDefault();
     const id = button.dataset.ingredient;
@@ -924,7 +991,12 @@
   el.playAgain.addEventListener("click", () => resetToMenu());
   el.toastClose.addEventListener("click", hideToast);
   el.soundToggle.addEventListener("click", toggleSound);
+  el.fullscreenToggle.addEventListener("click", toggleFullscreenMode);
   el.scrollTopButton.addEventListener("click", scrollMainPageToTop);
+  el.mobileGameNav.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-game-jump]");
+    if (button) jumpToGameSection(button.dataset.gameJump);
+  });
   window.addEventListener("scroll", scheduleScrollTopButtonUpdate, { passive: true });
   el.menuScreen.addEventListener("scroll", scheduleScrollTopButtonUpdate, { passive: true });
 
@@ -941,7 +1013,10 @@
       if (audioState.enabled && audioState.context) startChiptune();
     }
   });
+  document.addEventListener("fullscreenchange", updateFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
 
+  updateFullscreenButton();
   updateSoundButton();
   initYaguareteCursor();
   renderCookbook();
