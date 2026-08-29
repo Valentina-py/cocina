@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2b1a12">
+  <meta name="description" content="Simulador táctil y educativo de cocina del Noroeste Argentino.">
+  <title>Fogón del NOA · Cocina regional interactiva</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="orientation-guard" role="status" aria-live="polite">
+    <span aria-hidden="true">↻</span>
+    <strong>Girá la tablet</strong>
+    <p>Esta experiencia fue diseñada para disfrutarse en horizontal.</p>
+  </div>
+
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <button id="home-button" class="brand-button" type="button" aria-label="Volver al menú principal">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span><strong>Fogón del NOA</strong><small>Cocina, territorio y memoria</small></span>
+      </button>
+
+      <div id="session-status" class="session-status" aria-live="polite">
+        <span id="status-text">Elegí una receta para comenzar</span>
+        <span id="idle-indicator" class="idle-indicator" hidden>
+          <span>Reinicio</span>
+          <strong id="idle-seconds">40 s</strong>
+        </span>
+      </div>
+    </header>
+
+    <main>
+      <section id="menu-screen" class="screen menu-screen is-active" aria-labelledby="menu-title">
+        <div class="menu-copy">
+          <p class="eyebrow">Experiencia interactiva</p>
+          <h1 id="menu-title">¿Qué se cocina hoy?</h1>
+          <p>Elegí un plato, sumá ingredientes y descubrí cómo una pequeña decisión puede llevar la receta hacia otra región.</p>
+          <div id="menu-notice" class="menu-notice" role="status" hidden></div>
+        </div>
+
+        <div id="dish-menu" class="dish-menu" aria-label="Platos disponibles">
+          <button class="dish-card" type="button" data-family="empanadas">
+            <span class="dish-icon" aria-hidden="true">🥟</span>
+            <span class="dish-text"><strong>Empanadas</strong><small>Salteña · Tucumana · Cordobesa</small></span>
+            <span class="dish-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="dish-card" type="button" data-family="humita">
+            <span class="dish-icon" aria-hidden="true">🌽</span>
+            <span class="dish-text"><strong>Humita</strong><small>En olla · En chala</small></span>
+            <span class="dish-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="dish-card" type="button" data-recipe="locro_criollo">
+            <span class="dish-icon" aria-hidden="true">🥘</span>
+            <span class="dish-text"><strong>Locro criollo</strong><small>Maíz, zapallo y fuego lento</small></span>
+            <span class="dish-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="dish-card" type="button" data-recipe="tamales_saltenos">
+            <span class="dish-icon" aria-hidden="true">🫔</span>
+            <span class="dish-text"><strong>Tamales</strong><small>Masa de maíz envuelta en chala</small></span>
+            <span class="dish-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div class="menu-instruction" aria-label="Cómo jugar">
+          <span aria-hidden="true">☝</span>
+          <p><strong>Tocá o arrastrá</strong> ingredientes de la alacena hacia la preparación.</p>
+        </div>
+      </section>
+
+      <section id="game-screen" class="screen game-screen" aria-label="Mesa de cocina interactiva" hidden>
+        <aside class="pantry panel" aria-labelledby="pantry-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Paso 1</p><h2 id="pantry-title">La alacena</h2></div>
+            <span class="touch-hint" aria-hidden="true">Tocá o arrastrá</span>
+          </div>
+          <div id="ingredient-grid" class="ingredient-grid"></div>
+        </aside>
+
+        <section class="cook-zone" aria-labelledby="cook-title">
+          <div class="cook-heading">
+            <p class="eyebrow">Paso 2 · Prepará</p>
+            <h2 id="cook-title">Al fuego</h2>
+          </div>
+
+          <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Recipiente de preparación; elegí un ingrediente de la alacena">
+            <div class="heat-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div id="vessel" class="vessel vessel--pot" aria-hidden="true">
+              <div class="vessel-content" id="vessel-content"></div>
+              <div class="vessel-rim"></div>
+            </div>
+            <p id="drop-instruction" class="drop-instruction">Soltá aquí los ingredientes</p>
+            <div id="added-chips" class="added-chips" aria-label="Ingredientes agregados"></div>
+          </div>
+
+          <div class="progress-card">
+            <div class="progress-copy"><span>Avance de la receta</span><strong id="progress-label">0 de 0</strong></div>
+            <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
+          </div>
+        </section>
+
+        <aside class="order panel" aria-labelledby="order-title">
+          <div class="order-paper">
+            <div class="order-pin" aria-hidden="true"></div>
+            <p class="eyebrow">Paso 3 · Comanda</p>
+            <h2 id="order-title">Tu receta</h2>
+            <div class="recipe-identity">
+              <span id="recipe-emoji" aria-hidden="true">🥟</span>
+              <div><strong id="recipe-name"></strong><small id="recipe-region"></small></div>
+            </div>
+            <p id="recipe-description" class="recipe-description"></p>
+            <ul id="checklist" class="checklist" aria-label="Ingredientes necesarios"></ul>
+            <div class="culture-note">
+              <span aria-hidden="true">✦</span>
+              <p id="culture-note"></p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="complete-screen" class="screen complete-screen" hidden aria-labelledby="complete-title">
+        <div class="celebration" aria-hidden="true"><i>✦</i><i>◆</i><i>✦</i><i>●</i><i>◆</i></div>
+        <div class="complete-copy">
+          <p class="eyebrow">¡Receta completada!</p>
+          <h1 id="complete-title">Maestro/a del Fuego y la Pacha</h1>
+          <p id="complete-message"></p>
+          <div class="achievement"><span aria-hidden="true">🏵️</span><div><small>Título obtenido</small><strong id="achievement-title"></strong></div></div>
+          <button id="play-again" class="primary-button" type="button">Cocinar otra receta</button>
+        </div>
+        <div class="qr-card">
+          <p class="eyebrow">Llevate la receta</p>
+          <h2>Escaneá y seguí explorando</h2>
+          <div id="qrcode" class="qrcode" aria-label="Código QR del recetario digital"></div>
+          <a id="recipe-link" href="#" target="_blank" rel="noopener">Abrir recetario digital</a>
+          <small>Apuntá la cámara de tu celular</small>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="variant-dialog" class="modal" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="variant-title">
+      <button class="modal-close" type="button" data-close-modal aria-label="Cerrar">×</button>
+      <p class="eyebrow">Elegí tu punto de partida</p>
+      <h2 id="variant-title">Variedades regionales</h2>
+      <p id="variant-subtitle"></p>
+      <div id="variant-options" class="variant-options"></div>
+    </section>
+  </div>
+
+  <div id="culture-toast" class="culture-toast" role="status" aria-live="assertive" hidden>
+    <div class="toast-icon" aria-hidden="true">¡Epa!</div>
+    <div><strong id="toast-title">La receta viajó</strong><p id="toast-message"></p></div>
+    <button id="toast-close" type="button" aria-label="Cerrar explicación">Entendido</button>
+  </div>
+
+  <script src="recipes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
