@@ -125,12 +125,16 @@
     el.cookbookNav.replaceChildren();
     el.cookbookContent.replaceChildren();
 
-    Object.values(chapters).forEach((chapter) => {
+    Object.values(chapters).forEach((chapter, index) => {
       const navButton = document.createElement("button");
       navButton.type = "button";
       navButton.className = "cookbook-nav-button";
       navButton.dataset.cookbookTarget = chapter.anchor;
-      navButton.innerHTML = `<span aria-hidden="true">${chapter.emoji}</span><strong>${chapter.name}</strong>`;
+      navButton.setAttribute("aria-label", `Ir a la receta de ${chapter.navName || chapter.name}`);
+      navButton.innerHTML = `
+        <span class="cookbook-nav-number" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+        <span class="cookbook-nav-icon" aria-hidden="true">${chapter.emoji}</span>
+        <strong>${chapter.navName || chapter.name}</strong>`;
       el.cookbookNav.append(navButton);
 
       const metadata = chapter.meta.map((item) => `

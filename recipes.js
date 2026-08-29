@@ -86,6 +86,7 @@ window.KITCHEN_DATA = {
     empanadas: {
       anchor: "receta-empanadas",
       name: "Empanadas regionales",
+      navName: "Empanadas",
       emoji: "🥟",
       region: "Salta · Tucumán · Córdoba",
       introduction: "Una masa fina guarda un relleno jugoso cuya identidad cambia de provincia en provincia. Esta receta maestra parte de la versión salteña y explica cómo llevarla hacia la tucumana o la cordobesa.",
@@ -124,6 +125,7 @@ window.KITCHEN_DATA = {
     humita: {
       anchor: "receta-humita",
       name: "Humita: en olla y en chala",
+      navName: "Humita",
       emoji: "🌽",
       region: "Salta · Jujuy · Tucumán",
       introduction: "El choclo fresco y el zapallo forman una crema de raíz prehispánica. La misma preparación puede servirse en plato o convertirse en paquetes envueltos en chala.",
@@ -161,6 +163,7 @@ window.KITCHEN_DATA = {
     locro: {
       anchor: "receta-locro",
       name: "Locro criollo de cocción lenta",
+      navName: "Locro",
       emoji: "🥘",
       region: "Noroeste argentino y Cuyo",
       introduction: "Maíz blanco, porotos y zapallo se cocinan hasta formar un guiso espeso y comunitario. La paciencia, más que la harina o la crema, es la responsable de su textura.",
@@ -198,7 +201,8 @@ window.KITCHEN_DATA = {
     tamales: {
       anchor: "receta-tamales",
       name: "Tamales norteños en chala",
-      emoji: "🫔",
+      navName: "Tamales",
+      emoji: "🌾",
       region: "Salta · Jujuy · Catamarca · Tucumán",
       introduction: "Una masa de maíz y zapallo envuelve un corazón de carne condimentada. La técnica depende tanto de la consistencia de la masa como de un paquete bien cerrado.",
       meta: [

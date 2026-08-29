@@ -842,49 +842,62 @@ main {
 .cookbook-nav {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
-  padding: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 12;
-  border-right: 2px solid #c89c5f;
-  border-bottom: 2px solid #c89c5f;
-  border-left: 2px solid #c89c5f;
-  border-radius: 0 0 18px 18px;
-  background: rgba(50,31,23,0.96);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 24px rgba(48,25,15,0.2);
+  gap: 10px;
+  margin: 16px clamp(12px, 2.4vw, 34px) 0;
+  padding: 0;
+  position: static;
+  border: 0;
+  background: transparent;
 }
 
 .cookbook-nav-button {
-  min-height: 57px;
+  min-height: 52px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 9px;
-  border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 12px;
-  color: #f1dfc3;
-  background: rgba(255,255,255,0.055);
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 9px 13px 9px 9px;
+  border: 1px solid rgba(126, 73, 39, 0.22);
+  border-radius: 14px;
+  color: #4b2d20;
+  background: rgba(255, 250, 238, 0.86);
+  box-shadow: 0 5px 14px rgba(80, 45, 26, 0.07);
   cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .cookbook-nav-button:hover,
 .cookbook-nav-button:focus-visible {
-  border-color: #f1bd68;
-  background: rgba(215,138,50,0.22);
+  border-color: rgba(183, 94, 40, 0.55);
+  background: #fffaf0;
+  box-shadow: 0 8px 18px rgba(80, 45, 26, 0.12);
   transform: translateY(-2px);
 }
 
-.cookbook-nav-button span {
-  font-size: 27px;
+.cookbook-nav-number {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff8eb;
+  background: #a8522b;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.cookbook-nav-icon {
+  flex: 0 0 auto;
+  font-size: 21px;
+  line-height: 1;
 }
 
 .cookbook-nav-button strong {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.1;
 }
 
 .cookbook-content {
@@ -3233,20 +3246,28 @@ main {
 
   .cookbook-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 8px;
+    gap: 8px;
+    margin: 12px 10px 0;
   }
 
   .cookbook-nav-button {
-    min-height: 49px;
+    min-height: 46px;
     gap: 6px;
+    padding: 7px 9px 7px 7px;
   }
 
-  .cookbook-nav-button span {
-    font-size: 22px;
+  .cookbook-nav-number {
+    width: 25px;
+    height: 25px;
+    font-size: 9px;
+  }
+
+  .cookbook-nav-icon {
+    font-size: 18px;
   }
 
   .cookbook-nav-button strong {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .cookbook-content {
