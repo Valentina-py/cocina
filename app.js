@@ -46,7 +46,8 @@
     recipeLink: document.querySelector("#recipe-link"),
     recipeLibrary: document.querySelector("#recipe-library"),
     cookbookNav: document.querySelector("#cookbook-nav"),
-    cookbookContent: document.querySelector("#cookbook-content")
+    cookbookContent: document.querySelector("#cookbook-content"),
+    yaguareteCursor: document.querySelector("#yaguarete-cursor")
   };
 
   const state = {
@@ -78,6 +79,34 @@
 
   function ingredient(id) {
     return DATA.ingredients[id];
+  }
+
+  function initYaguareteCursor() {
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    if (!el.yaguareteCursor || !finePointer.matches) return;
+
+    let cursorFrame = null;
+    let pointerX = -100;
+    let pointerY = -100;
+
+    document.body.classList.add("has-yaguarete-cursor");
+
+    const paintCursor = () => {
+      el.yaguareteCursor.style.transform = `translate3d(${pointerX - 18}px, ${pointerY - 18}px, 0)`;
+      cursorFrame = null;
+    };
+
+    document.addEventListener("mousemove", (event) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      el.yaguareteCursor.classList.add("is-visible");
+      if (!cursorFrame) cursorFrame = window.requestAnimationFrame(paintCursor);
+    }, { passive: true });
+
+    document.addEventListener("mousedown", () => el.yaguareteCursor.classList.add("is-pressing"));
+    document.addEventListener("mouseup", () => el.yaguareteCursor.classList.remove("is-pressing"));
+    document.documentElement.addEventListener("mouseleave", () => el.yaguareteCursor.classList.remove("is-visible"));
+    window.addEventListener("blur", () => el.yaguareteCursor.classList.remove("is-visible", "is-pressing"));
   }
 
   function openFamily(familyId) {
@@ -667,6 +696,7 @@
     if (!document.hidden) noteActivity();
   });
 
+  initYaguareteCursor();
   renderCookbook();
   resetToMenu();
 })();
