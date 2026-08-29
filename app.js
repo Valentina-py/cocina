@@ -54,6 +54,7 @@
     completeMessage: document.querySelector("#complete-message"),
     endingEyebrow: document.querySelector("#ending-eyebrow"),
     achievementLabel: document.querySelector("#achievement-label"),
+    achievementIcon: document.querySelector("#achievement-icon"),
     achievementTitle: document.querySelector("#achievement-title"),
     secretAchievement: document.querySelector("#secret-achievement"),
     secretAchievementIcon: document.querySelector("#secret-achievement-icon"),
@@ -104,7 +105,8 @@
     sessionAchievements: new Set(),
     factTimer: null,
     factHideTimer: null,
-    factIndex: Math.floor(Math.random() * Math.max(1, DATA.didYouKnow?.length || 1))
+    factIndex: Math.floor(Math.random() * Math.max(1, DATA.didYouKnow?.length || 1)),
+    failureVariantCounts: {}
   };
 
   const ACHIEVEMENT_STORAGE_KEY = "fogon-noa-logros-ocultos";
@@ -973,6 +975,47 @@
       }
     };
     const outcome = outcomes[type] || outcomes.spoiled;
+    const copyVariants = {
+      burned: [
+        { title: "¡El fogón se descontroló!", message: `El fuego quedó demasiado fuerte y ${current.name} terminó quemándose. La zona roja indica que es momento de bajar la intensidad.`, tip: "Bajá el fuego antes de llegar a la zona roja" },
+        { title: "¡Mucho fuego para una sola olla!", message: `${current.name} recibió más calor del que podía soportar. En la cocina regional, el tiempo y la paciencia también son ingredientes.`, tip: "Mantené el indicador en la franja de fuego parejo" },
+        { title: "¡Del dorado al carbón!", message: `La temperatura subió hasta el máximo y los sabores de ${current.name} se perdieron entre el humo.`, tip: "Hacé ajustes pequeños y observá el termómetro" }
+      ],
+      spoiled: [
+        { title: "¡La receta perdió el rumbo!", message: `Probaste varios ingredientes ajenos a ${current.name} y la mezcla dejó de seguir una identidad regional reconocible.`, tip: "Compará cada ingrediente con la comanda" },
+        { title: "¡Demasiadas pistas falsas!", message: `Tres elecciones distintas no correspondían a ${current.name}. Explorar sirve, pero esta combinación no encontró equilibrio.`, tip: "Leé la explicación del error antes de continuar" },
+        { title: "¡La alacena hizo una travesura!", message: `La preparación reunió sabores que pertenecían a otras recetas y ${current.name} terminó transformándose en una mezcla imposible.`, tip: "Buscá primero los ingredientes principales del plato" }
+      ],
+      stubborn: [
+        { title: "¡El cucharón se puso porfiado!", message: `Insististe tres veces con el mismo ingrediente aunque no pertenecía a ${current.name}. La repetición terminó alterando su identidad.`, tip: "Si aparece un error, probá una opción diferente" },
+        { title: "¡Tres veces no lo hicieron correcto!", message: `El mismo ingrediente volvió una y otra vez, pero seguía sin formar parte de la comanda de ${current.name}.`, tip: "Usá la explicación como pista para buscar otro ingrediente" },
+        { title: "¡Ese ingrediente no quería irse!", message: `La receta rechazó tres veces la misma elección. ${current.name} necesita otro sabor para completar su preparación.`, tip: "Revisá los ingredientes todavía sin marcar" }
+      ],
+      sweetChaos: [
+        { title: "¡La receta se volvió demasiado dulce!", message: `Las pasas o el azúcar entraron en ${current.name} sin pertenecer a esta variante y taparon sus sabores principales.`, tip: "Reservá los ingredientes dulces para variantes que los pidan" },
+        { title: "¡Un dulzor fuera de lugar!", message: `${current.name} tomó un camino azucarado que no coincidía con la comanda regional elegida.`, tip: "Mirá la región de la receta antes de sumar pasas o azúcar" }
+      ],
+      dairyChaos: [
+        { title: "¡Una nube de queso cubrió la receta!", message: `El queso o la leche cambiaron la textura que debía tener ${current.name}. En esta comanda, el cuerpo se consigue con otros ingredientes.`, tip: "Buscá qué ingrediente aporta la cremosidad original" },
+        { title: "¡La textura tomó otro camino!", message: `Los lácteos no pertenecían a esta versión de ${current.name} y modificaron demasiado su consistencia.`, tip: "No todos los platos cremosos necesitan leche o queso" }
+      ],
+      meatChaos: [
+        { title: "¡Se armó un carnaval de carnes!", message: `Agregaste una carne que no correspondía a ${current.name}. Cada corte necesita una técnica y un tiempo diferente.`, tip: "Identificá el corte específico que pide la comanda" },
+        { title: "¡Los cortes se confundieron de olla!", message: `${current.name} recibió carnes de otras preparaciones y perdió el equilibrio entre sabor, textura y cocción.`, tip: "Carne, matambre, cerdo y charqui no son intercambiables" }
+      ],
+      undercooked: [
+        { title: "¡Las brasas se quedaron dormidas!", message: `Agregaste todos los ingredientes de ${current.name}, pero el fuego quedó demasiado bajo para alcanzar una cocción segura.`, tip: "Terminá la receta con el fuego en la zona pareja" },
+        { title: "¡Faltó despertar el fogón!", message: `La comanda estaba completa, aunque ${current.name} todavía necesitaba más temperatura y tiempo de cocción.`, tip: "Antes de finalizar, revisá también el termómetro" }
+      ],
+      unstable: [
+        { title: "¡El fuego perdió el ritmo!", message: `Subiste y bajaste la intensidad demasiadas veces y ${current.name} terminó con una cocción despareja.`, tip: "Sostené una temperatura estable durante la preparación" },
+        { title: "¡El termómetro no paró de bailar!", message: `Los cambios bruscos de calor cocinaron algunas partes de ${current.name} más rápido que otras.`, tip: "Corregí el fuego solo cuando realmente sea necesario" }
+      ]
+    };
+    const variants = copyVariants[type] || copyVariants.spoiled;
+    const variantIndex = state.failureVariantCounts[type] || 0;
+    const selectedCopy = variants[variantIndex % variants.length];
+    state.failureVariantCounts[type] = variantIndex + 1;
 
     state.completed = true;
     state.ending = false;
@@ -984,10 +1027,11 @@
     el.completeScreen.dataset.outcome = type;
     el.completeScreen.classList.add("is-failed");
     el.endingEyebrow.textContent = "Final alternativo · Qué pasó";
-    el.achievementLabel.textContent = "Logro oculto obtenido";
-    el.completeTitle.textContent = outcome.title;
-    el.completeMessage.textContent = outcome.message;
-    el.achievementTitle.textContent = outcome.achievement;
+    el.achievementLabel.textContent = "Consejo para el próximo intento";
+    el.achievementIcon.textContent = "💡";
+    el.completeTitle.textContent = selectedCopy.title;
+    el.completeMessage.textContent = selectedCopy.message;
+    el.achievementTitle.textContent = selectedCopy.tip;
     el.victoryForm.reset();
     el.victoryForm.hidden = true;
     el.victorySignature.hidden = true;
@@ -1018,6 +1062,7 @@
     el.completeScreen.classList.remove("is-failed");
     el.endingEyebrow.textContent = "¡Receta completada!";
     el.achievementLabel.textContent = "Título obtenido";
+    el.achievementIcon.textContent = "🏵️";
     el.completeTitle.textContent = "¡El fogón está de fiesta!";
     el.completeMessage.textContent = `Completaste ${current.name}. Cada ingrediente cuenta una historia de territorio, intercambio y memoria.`;
     el.achievementTitle.textContent = current.achievement;
