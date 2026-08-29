@@ -52,7 +52,7 @@
     achievementTitle: document.querySelector("#achievement-title"),
     victoryForm: document.querySelector("#victory-form"),
     playerName: document.querySelector("#player-name"),
-    groupName: document.querySelector("#group-name"),
+    visitorPlace: document.querySelector("#visitor-place"),
     victorySignature: document.querySelector("#victory-signature"),
     playAgain: document.querySelector("#play-again"),
     qrcode: document.querySelector("#qrcode"),
@@ -773,7 +773,7 @@
   function personalizeVictory(event) {
     event.preventDefault();
     const playerName = el.playerName.value.trim();
-    const groupName = el.groupName.value.trim();
+    const visitorPlace = el.visitorPlace.value.trim();
 
     if (!playerName) {
       el.playerName.setCustomValidity("Escribí tu nombre para personalizar el reconocimiento.");
@@ -784,8 +784,8 @@
 
     el.playerName.setCustomValidity("");
     el.completeTitle.textContent = `¡Felicitaciones, ${playerName}!`;
-    el.victorySignature.textContent = groupName
-      ? `Este reconocimiento celebra a ${playerName}, de ${groupName}.`
+    el.victorySignature.textContent = visitorPlace
+      ? `Este reconocimiento celebra a ${playerName}, que nos visita desde ${visitorPlace}.`
       : `Este reconocimiento celebra a ${playerName}.`;
     el.victorySignature.hidden = false;
   }

@@ -10,7 +10,7 @@
   <meta name="description" content="Simulador táctil y educativo de cocina del Noroeste Argentino.">
   <title>Fogón del NOA · Cocina regional interactiva</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260829-4">
+  <link rel="stylesheet" href="styles.css?v=20260829-5">
 </head>
 <body>
   <div class="orientation-guard" role="status" aria-live="polite">
@@ -190,12 +190,24 @@
 
             <form id="victory-form" class="victory-form" autocomplete="off">
               <div class="victory-field">
-                <label for="player-name">Nombre del cocinero o cocinera</label>
+                <label for="player-name">Tu nombre</label>
                 <input id="player-name" name="playerName" type="text" maxlength="32" placeholder="Escribí tu nombre" inputmode="text" required>
               </div>
               <div class="victory-field">
-                <label for="group-name">Curso, escuela o equipo <span>(opcional)</span></label>
-                <input id="group-name" name="groupName" type="text" maxlength="42" placeholder="¿Con quién cocinaste?" inputmode="text">
+                <label for="visitor-place">¿Desde dónde nos visitás? <span>(opcional)</span></label>
+                <input id="visitor-place" name="visitorPlace" type="text" maxlength="48" placeholder="Ej.: Tartagal o Colonia Santa Rosa" inputmode="text" list="visitor-places">
+                <datalist id="visitor-places">
+                  <option value="Colonia Santa Rosa"></option>
+                  <option value="Hipólito Yrigoyen"></option>
+                  <option value="Tartagal"></option>
+                  <option value="Salta Capital"></option>
+                  <option value="San Ramón de la Nueva Orán"></option>
+                  <option value="Pichanal"></option>
+                  <option value="Embarcación"></option>
+                  <option value="Aguas Blancas"></option>
+                  <option value="General Mosconi"></option>
+                  <option value="Urundel"></option>
+                </datalist>
               </div>
               <button class="victory-name-button" type="submit">Personalizar mi reconocimiento</button>
               <p id="victory-signature" class="victory-signature" role="status" hidden></p>
@@ -247,7 +259,7 @@
     </div>
   </div>
 
-  <script src="recipes.js?v=20260829-4"></script>
-  <script src="app.js?v=20260829-4"></script>
+  <script src="recipes.js?v=20260829-5"></script>
+  <script src="app.js?v=20260829-5"></script>
 </body>
 </html>
