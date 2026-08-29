@@ -95,6 +95,8 @@
     heat: 45,
     wrongAttempts: 0,
     wrongIngredients: new Map(),
+    wrongSequence: [],
+    pantryOrder: [],
     heatMoves: 0,
     lastHeatDirection: 0,
     heatDirectionChanges: 0,
@@ -599,6 +601,8 @@
     state.heat = 45;
     state.wrongAttempts = 0;
     state.wrongIngredients = new Map();
+    state.wrongSequence = [];
+    state.pantryOrder = shuffleIngredients(DATA.recipes[recipeId].pantry);
     state.heatMoves = 0;
     state.lastHeatDirection = 0;
     state.heatDirectionChanges = 0;
@@ -636,7 +640,10 @@
   function renderPantry(current) {
     el.ingredientGrid.replaceChildren();
 
-    current.pantry.forEach((id) => {
+    const missing = current.pantry.filter((id) => !state.pantryOrder.includes(id));
+    state.pantryOrder = state.pantryOrder.filter((id) => current.pantry.includes(id)).concat(shuffleIngredients(missing));
+
+    state.pantryOrder.forEach((id) => {
       const item = ingredient(id);
       const added = state.added.has(id);
       const button = document.createElement("button");
@@ -648,6 +655,15 @@
       button.innerHTML = `<span aria-hidden="true">${item.icon}</span><strong>${item.name}</strong><small>${added ? "Tocar para quitar ↶" : "Tocar o mover"}</small>`;
       el.ingredientGrid.append(button);
     });
+  }
+
+  function shuffleIngredients(items) {
+    const shuffled = [...items];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    return shuffled;
   }
 
   function renderChecklist(current) {
@@ -826,6 +842,7 @@
     state.wrongAttempts += 1;
     const repeatedCount = (state.wrongIngredients.get(id) || 0) + 1;
     state.wrongIngredients.set(id, repeatedCount);
+    state.wrongSequence.push(id);
     playErrorSound();
     el.toastTitle.textContent = "Ese ingrediente no va en esta receta";
     el.toastMessage.textContent = state.wrongAttempts >= 3
@@ -841,7 +858,17 @@
       token?.classList.remove("is-rejected");
     }, 720);
     showToast(9000, "error");
-    if (state.wrongAttempts >= 3) scheduleFailure(repeatedCount >= 3 ? "stubborn" : "spoiled", 1250);
+    if (state.wrongAttempts >= 3) scheduleFailure(failureFromWrongIngredients(id, repeatedCount), 1250);
+  }
+
+  function failureFromWrongIngredients(lastId, repeatedCount) {
+    if (repeatedCount >= 3) return "stubborn";
+    const mistakes = new Set(state.wrongSequence);
+    if (["azucar", "pasas"].some((id) => mistakes.has(id))) return "sweetChaos";
+    if (["queso", "leche"].some((id) => mistakes.has(id))) return "dairyChaos";
+    const meats = ["carne", "matambre", "cerdo", "panceta", "chorizo", "charqui"];
+    if (meats.filter((id) => mistakes.has(id)).length >= 2 || meats.includes(lastId)) return "meatChaos";
+    return "spoiled";
   }
 
   function transformRecipe(variation, triggerId) {
@@ -914,6 +941,24 @@
         achievement: "Cucharón Porfiado",
         achievementId: "cucharon_porfiado"
       },
+      sweetChaos: {
+        title: "¡La receta se volvió demasiado dulce!",
+        message: `Las pasas o el azúcar entraron en ${current.name} sin formar parte de esta variante. El contraste tapó sus sabores principales y abrió un final inesperado.`,
+        achievement: "Dulzura Rebelde",
+        achievementId: "dulzura_rebelde"
+      },
+      dairyChaos: {
+        title: "¡Una nube de queso cubrió la receta!",
+        message: `El queso o la leche cambiaron la textura que debía tener ${current.name}. En esta comanda, la cremosidad o el cuerpo se consiguen con otros ingredientes.`,
+        achievement: "Domador/a de la Nube de Queso",
+        achievementId: "nube_de_queso"
+      },
+      meatChaos: {
+        title: "¡Se armó un carnaval de carnes!",
+        message: `Agregaste una carne que no correspondía a ${current.name}. Cada corte necesita una técnica y un tiempo distinto, y la preparación perdió su equilibrio.`,
+        achievement: "Director/a del Carnaval de Carnes",
+        achievementId: "carnaval_de_carnes"
+      },
       undercooked: {
         title: "¡Las brasas se quedaron dormidas!",
         message: `Agregaste todos los ingredientes de ${current.name}, pero el fuego quedó demasiado bajo. La preparación no alcanzó la temperatura necesaria para cocinarse correctamente.`,
@@ -951,7 +996,7 @@
     el.playAgain.textContent = "Elegir otro plato";
     el.victoryQrCard.hidden = true;
     renderSecretAchievement(outcome.achievementId);
-    const statusByOutcome = { burned: "Preparación quemada", spoiled: "Mezcla estropeada", stubborn: "Ingrediente repetido", undercooked: "Preparación sin cocción", unstable: "Cocción despareja" };
+    const statusByOutcome = { burned: "Preparación quemada", spoiled: "Mezcla estropeada", stubborn: "Ingrediente repetido", sweetChaos: "Exceso de dulzor", dairyChaos: "Textura alterada", meatChaos: "Carnes incompatibles", undercooked: "Preparación sin cocción", unstable: "Cocción despareja" };
     el.statusText.textContent = statusByOutcome[type] || "Preparación estropeada";
     el.idleIndicator.hidden = true;
     activateScreen(el.completeScreen);
@@ -1110,6 +1155,8 @@
     state.heat = 45;
     state.wrongAttempts = 0;
     state.wrongIngredients = new Map();
+    state.wrongSequence = [];
+    state.pantryOrder = [];
     state.heatMoves = 0;
     state.lastHeatDirection = 0;
     state.heatDirectionChanges = 0;

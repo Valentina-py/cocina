@@ -26,6 +26,21 @@ window.KITCHEN_DATA = {
       title: "Cucharón Porfiado",
       description: "Insististe tres veces con el mismo ingrediente y descubriste que una receta también sabe decir que no."
     },
+    dulzura_rebelde: {
+      icon: "🍇",
+      title: "Dulzura Rebelde",
+      description: "Llevaste pasas o azúcar hacia una preparación que no pedía notas dulces y abriste un final inesperado."
+    },
+    nube_de_queso: {
+      icon: "🧀",
+      title: "Domador/a de la Nube de Queso",
+      description: "Insististe con lácteos en una comanda cuya textura se construía de otra manera."
+    },
+    carnaval_de_carnes: {
+      icon: "🍖",
+      title: "Director/a del Carnaval de Carnes",
+      description: "Mezclaste carnes ajenas a la receta hasta que el plato dejó de reconocer su propio relleno."
+    },
     fogon_dormido: {
       icon: "🪵",
       title: "Guardián/a de las Brasas Dormidas",
