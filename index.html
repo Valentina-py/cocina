@@ -10,7 +10,7 @@
   <meta name="description" content="Simulador táctil y educativo de cocina del Noroeste Argentino.">
   <title>Fogón del NOA · Cocina regional interactiva</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260901-8">
+  <link rel="stylesheet" href="styles.css?v=20260901-9">
 </head>
 <body>
   <div class="orientation-guard" role="status" aria-live="polite">
@@ -27,24 +27,10 @@
       </button>
 
       <div class="topbar-tools">
-        <label class="music-picker" for="music-select"><span>Pista 8-bit</span><select id="music-select" aria-label="Elegir música 8-bit">
-          <optgroup label="Clásicos conocidos · dominio público">
-            <option value="korobeiniki">Korobeiniki · melodía de Tetris</option>
-            <option value="turca">Marcha Turca · Mozart</option>
-            <option value="cancan">Can-Can · Offenbach</option>
-            <option value="montana">En la gruta del rey de la montaña · Grieg</option>
-            <option value="danubio">El Danubio Azul · Strauss</option>
-          </optgroup>
-          <optgroup label="Temas originales del Fogón">
-          <option value="fogon">Fogón Pixel</option>
-          <option value="seul">Neón de Seúl · K-pop original</option>
-          <option value="yaguarete">Salto Yaguareté</option>
-          <option value="carnaval">Carnaval Turbo</option>
-          <option value="luna">Luna de la Peña</option>
-          <option value="chala">Chala Pop</option>
-          <option value="altiplano">Altiplano Arcade</option>
-          <option value="estelar">Peña Estelar</option>
-          </optgroup>
+        <label class="music-picker" for="music-select"><span>Piano clásico</span><select id="music-select" aria-label="Elegir obra clásica completa">
+          <option value="mozart-turca">Mozart · Marcha Turca completa</option>
+          <option value="beethoven-elise">Beethoven · Para Elisa completa</option>
+          <option value="bach-preludio">Bach · Preludio en do mayor completo</option>
         </select></label>
         <button id="fullscreen-toggle" class="sound-toggle fullscreen-toggle" type="button" aria-label="Abrir en pantalla completa">
           <span id="fullscreen-icon" class="sound-icon" aria-hidden="true">⛶</span>
@@ -138,6 +124,9 @@
               <a href="https://www.argentina.gob.ar/node/504764" target="_blank" rel="noopener">Locro</a>
               <a href="https://www.argentina.gob.ar/node/488407" target="_blank" rel="noopener">Tamales</a>
               <a href="https://www.argentina.gob.ar/noticias/celebracion-del-25-mayo-pautas-para-la-elaboracion-de-un-locro-seguro-y-saludable" target="_blank" rel="noopener">Cocina segura</a>
+              <a href="https://commons.wikimedia.org/wiki/File:Rondo_Alla_Turka.ogg" target="_blank" rel="noopener">Música: Mozart · dominio público</a>
+              <a href="https://commons.wikimedia.org/wiki/File:FurElise.ogg" target="_blank" rel="noopener">Música: Beethoven · CC0</a>
+              <a href="https://commons.wikimedia.org/wiki/File:Bach_C_Major_Prelude_Equal.ogg" target="_blank" rel="noopener">Música: Bach · dominio público</a>
             </div>
           </footer>
         </section>
@@ -324,7 +313,7 @@
     </div>
   </div>
 
-  <script src="recipes.js?v=20260901-8"></script>
-  <script src="app.js?v=20260901-8"></script>
+  <script src="recipes.js?v=20260901-9"></script>
+  <script src="app.js?v=20260901-9"></script>
 </body>
 </html>

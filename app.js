@@ -182,37 +182,15 @@
     noiseBuffer: null,
     enabled: true,
     sequenceTimer: null,
-    nextStepAt: 0,
-    step: 0,
-    trackId: window.localStorage.getItem("fogon-noa-pista") || "fogon"
+    player: null,
+    trackId: window.localStorage.getItem("fogon-noa-pista") || "mozart-turca"
   };
 
-  function createChiptune(leads, basses, stepSeconds = 0.16) {
-    return {
-      stepSeconds,
-      sequence: leads.map((lead, index) => ({ lead, bass: index % 4 === 0 ? basses[(index / 4) % basses.length] : null }))
-    };
-  }
-
-  const CHIPTUNE_TRACKS = {
-    korobeiniki: createChiptune([64,59,60,62,60,59,57,57,60,64,62,60,59,59,60,62,64,60,57,57,null,62,65,69,67,65,64,60,64,62,60,59,59,60,62,64,60,57,57], [45,40,41,43], .13),
-    turca: createChiptune([71,69,68,69,72,null,74,72,71,72,76,null,77,76,74,72,71,69,68,69,72,74,72,71,69,68,69,71,69,null,null], [45,40,44,45], .125),
-    cancan: createChiptune([67,67,69,71,72,72,71,69,67,67,69,71,72,69,67,null,72,72,74,76,77,76,74,72,71,69,67,69,71,67,null,null], [43,48,45,50], .12),
-    montana: createChiptune([59,61,62,64,66,62,66,70,59,61,62,64,66,62,66,69,57,59,60,62,64,60,64,68,57,59,60,62,64,60,64,67], [35,38,33,40], .145),
-    danubio: createChiptune([62,null,66,69,69,null,69,null,73,null,73,null,66,null,66,null,62,null,66,69,69,null,69,null,74,null,74,null,67,null,67,null], [38,45,42,43], .19),
-    fogon: createChiptune([69,72,76,null,74,72,69,67,64,67,71,69,67,64,62,null,69,71,72,76,79,76,74,72,74,72,69,67,64,67,69,null], [45,40,41,43], .16),
-    seul: createChiptune([76,79,81,83,81,79,76,74,76,79,83,86,84,83,79,null,74,76,79,81,79,76,74,71,72,76,79,83,81,79,76,null], [45,41,43,40], .135),
-    yaguarete: createChiptune([67,69,72,74,72,69,74,76,79,76,74,72,69,67,64,null,67,72,76,79,76,72,69,67,64,67,69,72,74,72,69,null], [43,38,40,41], .145),
-    carnaval: createChiptune([72,76,79,84,83,79,76,72,74,77,81,86,84,81,77,74,72,74,76,79,81,79,76,74,72,76,79,81,79,76,72,null], [36,41,38,43], .12),
-    luna: createChiptune([69,null,72,76,74,null,72,69,67,null,69,72,71,null,67,64,69,72,76,79,76,74,72,69,67,69,72,74,72,69,67,null], [45,41,43,40], .19),
-    chala: createChiptune([64,67,71,72,71,67,64,62,64,69,72,76,74,72,69,67,64,67,69,71,72,76,74,72,71,69,67,64,62,64,67,null], [40,45,41,43], .15),
-    altiplano: createChiptune([62,67,69,74,72,69,67,62,65,69,72,77,76,72,69,65,62,65,67,69,72,74,76,77,76,74,72,69,67,65,62,null], [38,43,41,36], .17),
-    estelar: createChiptune([79,83,86,88,86,83,81,79,76,79,83,86,84,81,79,76,74,76,79,81,83,81,79,76,74,72,74,76,79,76,74,null], [43,40,45,41], .14)
+  const CLASSICAL_TRACKS = {
+    "mozart-turca": "mozart-rondo-alla-turca.ogg",
+    "beethoven-elise": "beethoven-fur-elise.ogg",
+    "bach-preludio": "bach-prelude-c-major.ogg"
   };
-
-  function currentChiptune() {
-    return CHIPTUNE_TRACKS[audioState.trackId] || CHIPTUNE_TRACKS.fogon;
-  }
 
   let scrollButtonFrame = null;
 
@@ -312,91 +290,45 @@
     oscillator.stop(start + duration + 0.02);
   }
 
-  function scheduleMusicStep(stepIndex, start) {
-    const track = currentChiptune();
-    const step = track.sequence[stepIndex];
-    if (step.lead) {
-      scheduleTone({
-        frequency: noteFrequency(step.lead),
-        start,
-        duration: track.stepSeconds * 0.78,
-        type: "square",
-        volume: 0.075,
-        destination: audioState.music
-      });
+  function classicalPlayer() {
+    if (!audioState.player) {
+      audioState.player = new Audio();
+      audioState.player.preload = "auto";
+      audioState.player.loop = true;
+      audioState.player.volume = 0.34;
     }
-    if (step.bass) {
-      scheduleTone({
-        frequency: noteFrequency(step.bass),
-        start,
-        duration: track.stepSeconds * 3.2,
-        type: "triangle",
-        volume: 0.095,
-        destination: audioState.music
-      });
-    }
-    if (stepIndex % 4 === 2 && step.lead) {
-      scheduleTone({
-        frequency: noteFrequency(step.lead - 12),
-        start: start + 0.018,
-        duration: track.stepSeconds * 0.48,
-        type: "square",
-        volume: 0.025,
-        destination: audioState.music
-      });
-    }
-  }
-
-  function scheduleChiptune() {
-    const context = audioState.context;
-    if (!context || !audioState.enabled) return;
-    while (audioState.nextStepAt < context.currentTime + 0.28) {
-      const track = currentChiptune();
-      scheduleMusicStep(audioState.step, audioState.nextStepAt);
-      audioState.step = (audioState.step + 1) % track.sequence.length;
-      audioState.nextStepAt += track.stepSeconds;
-    }
+    return audioState.player;
   }
 
   function changeMusicTrack() {
     const nextTrack = el.musicSelect.value;
-    if (!CHIPTUNE_TRACKS[nextTrack]) return;
+    if (!CLASSICAL_TRACKS[nextTrack]) return;
     audioState.trackId = nextTrack;
-    audioState.step = 0;
     try { window.localStorage.setItem("fogon-noa-pista", nextTrack); } catch (_) {}
-    const wasPlaying = Boolean(audioState.sequenceTimer);
+    const player = classicalPlayer();
+    const wasPlaying = !player.paused;
+    player.pause();
+    player.src = CLASSICAL_TRACKS[nextTrack];
+    player.currentTime = 0;
     if (wasPlaying) {
-      stopChiptune();
-      startChiptune();
+      player.play().catch(() => {});
     } else if (audioState.enabled) {
       startChiptune();
     }
   }
 
   function startChiptune() {
-    const context = ensureAudio();
-    if (!context || !audioState.enabled || audioState.sequenceTimer) return;
-    const begin = () => {
-      audioState.music.gain.cancelScheduledValues(context.currentTime);
-      audioState.music.gain.setTargetAtTime(0.22, context.currentTime, 0.04);
-      audioState.nextStepAt = context.currentTime + 0.06;
-      scheduleChiptune();
-      audioState.sequenceTimer = window.setInterval(scheduleChiptune, 90);
-    };
-    if (context.state === "suspended") {
-      context.resume().then(begin).catch(() => {});
-    } else {
-      begin();
-    }
+    if (!audioState.enabled) return;
+    const player = classicalPlayer();
+    const selectedTrack = CLASSICAL_TRACKS[audioState.trackId] || CLASSICAL_TRACKS["mozart-turca"];
+    if (!player.src || !player.src.endsWith(selectedTrack)) player.src = selectedTrack;
+    player.play().catch(() => {});
+    audioState.sequenceTimer = true;
   }
 
   function stopChiptune() {
-    window.clearInterval(audioState.sequenceTimer);
+    if (audioState.player) audioState.player.pause();
     audioState.sequenceTimer = null;
-    if (audioState.context && audioState.music) {
-      audioState.music.gain.cancelScheduledValues(audioState.context.currentTime);
-      audioState.music.gain.setTargetAtTime(0.0001, audioState.context.currentTime, 0.025);
-    }
   }
 
   function updateSoundButton(forcedLabel = "") {
@@ -1706,7 +1638,7 @@
       stopChiptune();
     } else {
       noteActivity();
-      if (audioState.enabled && audioState.context) startChiptune();
+      if (audioState.enabled) startChiptune();
     }
   });
   document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -1714,7 +1646,8 @@
 
   updateFullscreenButton();
   updateSoundButton();
-  if (CHIPTUNE_TRACKS[audioState.trackId]) el.musicSelect.value = audioState.trackId;
+  if (!CLASSICAL_TRACKS[audioState.trackId]) audioState.trackId = "mozart-turca";
+  el.musicSelect.value = audioState.trackId;
   initYaguareteCursor();
   renderCookbook();
   renderLeaderboard();
