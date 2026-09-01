@@ -10,7 +10,7 @@
   <meta name="description" content="Simulador táctil y educativo de cocina del Noroeste Argentino.">
   <title>Fogón del NOA · Cocina regional interactiva</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260829-9">
+  <link rel="stylesheet" href="styles.css?v=20260901-8">
 </head>
 <body>
   <div class="orientation-guard" role="status" aria-live="polite">
@@ -27,6 +27,25 @@
       </button>
 
       <div class="topbar-tools">
+        <label class="music-picker" for="music-select"><span>Pista 8-bit</span><select id="music-select" aria-label="Elegir música 8-bit">
+          <optgroup label="Clásicos conocidos · dominio público">
+            <option value="korobeiniki">Korobeiniki · melodía de Tetris</option>
+            <option value="turca">Marcha Turca · Mozart</option>
+            <option value="cancan">Can-Can · Offenbach</option>
+            <option value="montana">En la gruta del rey de la montaña · Grieg</option>
+            <option value="danubio">El Danubio Azul · Strauss</option>
+          </optgroup>
+          <optgroup label="Temas originales del Fogón">
+          <option value="fogon">Fogón Pixel</option>
+          <option value="seul">Neón de Seúl · K-pop original</option>
+          <option value="yaguarete">Salto Yaguareté</option>
+          <option value="carnaval">Carnaval Turbo</option>
+          <option value="luna">Luna de la Peña</option>
+          <option value="chala">Chala Pop</option>
+          <option value="altiplano">Altiplano Arcade</option>
+          <option value="estelar">Peña Estelar</option>
+          </optgroup>
+        </select></label>
         <button id="fullscreen-toggle" class="sound-toggle fullscreen-toggle" type="button" aria-label="Abrir en pantalla completa">
           <span id="fullscreen-icon" class="sound-icon" aria-hidden="true">⛶</span>
           <span id="fullscreen-label">Pantalla completa</span>
@@ -77,6 +96,21 @@
           </button>
         </div>
 
+        <section class="difficulty-section" aria-labelledby="difficulty-title">
+          <div class="difficulty-heading"><p class="eyebrow">Antes de cocinar</p><h2 id="difficulty-title">Elegí la dificultad</h2></div>
+          <div id="difficulty-options" class="difficulty-options">
+            <button type="button" data-difficulty="easy" class="is-selected"><strong>Fácil</strong><small>3 errores permitidos · guía completa</small></button>
+            <button type="button" data-difficulty="medium"><strong>Media</strong><small>2 errores · más técnicas · suma puntos</small></button>
+            <button type="button" data-difficulty="hard"><strong>Difícil</strong><small>1 error · cronómetro · competencia</small></button>
+          </div>
+        </section>
+
+        <section class="leaderboard-section" aria-labelledby="leaderboard-title">
+          <header><div><p class="eyebrow">Competencia del stand</p><h2 id="leaderboard-title">Olimpíadas de Cocina Regional</h2><p>Participan únicamente las partidas en dificultad media y difícil.</p></div><button id="export-ranking" type="button">Descargar respaldo</button></header>
+          <div id="leaderboard-empty" class="leaderboard-empty">Todavía no hay participantes. ¡Los cuatro podios están esperando!</div>
+          <div id="leaderboard-list" class="leaderboard-categories" aria-label="Clasificaciones por plato"></div>
+        </section>
+
         <div class="menu-instruction" aria-label="Cómo jugar">
           <span aria-hidden="true">☝</span>
           <p><strong>Tocá o arrastrá</strong> ingredientes de la alacena hacia la preparación.</p>
@@ -121,7 +155,12 @@
             <div><p class="eyebrow">Paso 1</p><h2 id="pantry-title">La alacena</h2></div>
             <span class="touch-hint" aria-hidden="true">Tocá para agregar</span>
           </div>
-          <div id="ingredient-grid" class="ingredient-grid"></div>
+          <div id="ingredient-grid" class="ingredient-grid" tabindex="0" aria-label="Ingredientes; deslizá para ver toda la alacena"></div>
+          <div class="pantry-scroll-controls" aria-label="Desplazar la alacena">
+            <button id="pantry-scroll-up" type="button" aria-label="Ver ingredientes anteriores">↑</button>
+            <span>Deslizá para ver más</span>
+            <button id="pantry-scroll-down" type="button" aria-label="Ver ingredientes siguientes">↓</button>
+          </div>
         </aside>
 
         <section id="cook-panel" class="cook-zone" aria-labelledby="cook-title">
@@ -150,9 +189,11 @@
 
           <div class="fire-controls" aria-label="Control del fuego">
             <button id="heat-down" type="button" aria-label="Bajar la intensidad del fuego"><span aria-hidden="true">−</span> Bajar fuego</button>
-            <div class="heat-status" aria-live="polite"><strong id="heat-status">Fuego parejo</strong><small>Zona ideal: 35–75%</small></div>
+            <div class="heat-status" aria-live="polite"><strong id="heat-status">Fogón apagado</strong><small id="ideal-heat-label">Zona ideal: 40–75%</small></div>
             <button id="heat-up" type="button" aria-label="Aumentar la intensidad del fuego">Avivar fuego <span aria-hidden="true">+</span></button>
           </div>
+
+          <div class="game-scorebar"><span id="difficulty-badge">Fácil</span><strong id="live-score">1000 puntos</strong><span id="game-timer" hidden>03:00</span></div>
 
           <div class="progress-card">
             <div class="progress-copy"><span>Avance de la receta</span><strong id="progress-label">0 de 0</strong></div>
@@ -204,6 +245,10 @@
                 <input id="player-name" name="playerName" type="text" maxlength="32" placeholder="Escribí tu nombre" inputmode="text" required>
               </div>
               <div class="victory-field">
+                <label for="player-nickname">Nick de juego <span>(para competir)</span></label>
+                <input id="player-nickname" name="playerNickname" type="text" maxlength="20" placeholder="Ej.: Pachamama23" inputmode="text" autocomplete="off">
+              </div>
+              <div class="victory-field visitor-place-field">
                 <label for="visitor-place">¿Desde dónde nos visitás? <span>(opcional)</span></label>
                 <input id="visitor-place" name="visitorPlace" type="text" maxlength="48" placeholder="Ej.: Tartagal o Colonia Santa Rosa" inputmode="text" list="visitor-places">
                 <datalist id="visitor-places">
@@ -219,7 +264,8 @@
                   <option value="Urundel"></option>
                 </datalist>
               </div>
-              <button class="victory-name-button" type="submit">Personalizar mi reconocimiento</button>
+              <label id="competition-option" class="competition-option" hidden><input id="join-competition" type="checkbox"><span><strong>Participar en la competencia</strong><small>El nick debe ser único dentro de este plato. Podés usarlo nuevamente en las otras tres categorías.</small></span></label>
+              <button class="victory-name-button" type="submit">Guardar mi reconocimiento</button>
               <p id="victory-signature" class="victory-signature" role="status" hidden></p>
             </form>
 
@@ -278,7 +324,7 @@
     </div>
   </div>
 
-  <script src="recipes.js?v=20260829-9"></script>
-  <script src="app.js?v=20260829-9"></script>
+  <script src="recipes.js?v=20260901-8"></script>
+  <script src="app.js?v=20260901-8"></script>
 </body>
 </html>

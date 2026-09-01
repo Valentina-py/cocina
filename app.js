@@ -13,6 +13,8 @@
     dishMenu: document.querySelector("#dish-menu"),
     menuNotice: document.querySelector("#menu-notice"),
     ingredientGrid: document.querySelector("#ingredient-grid"),
+    pantryScrollUp: document.querySelector("#pantry-scroll-up"),
+    pantryScrollDown: document.querySelector("#pantry-scroll-down"),
     dropZone: document.querySelector("#drop-zone"),
     vessel: document.querySelector("#vessel"),
     vesselContent: document.querySelector("#vessel-content"),
@@ -32,12 +34,18 @@
     heatDown: document.querySelector("#heat-down"),
     heatUp: document.querySelector("#heat-up"),
     heatStatus: document.querySelector("#heat-status"),
+    idealHeatLabel: document.querySelector("#ideal-heat-label"),
+    difficultyOptions: document.querySelector("#difficulty-options"),
+    difficultyBadge: document.querySelector("#difficulty-badge"),
+    liveScore: document.querySelector("#live-score"),
+    gameTimer: document.querySelector("#game-timer"),
     fullscreenToggle: document.querySelector("#fullscreen-toggle"),
     fullscreenIcon: document.querySelector("#fullscreen-icon"),
     fullscreenLabel: document.querySelector("#fullscreen-label"),
     soundToggle: document.querySelector("#sound-toggle"),
     soundIcon: document.querySelector("#sound-icon"),
     soundLabel: document.querySelector("#sound-label"),
+    musicSelect: document.querySelector("#music-select"),
     sessionStatus: document.querySelector("#session-status"),
     statusText: document.querySelector("#status-text"),
     idleIndicator: document.querySelector("#idle-indicator"),
@@ -62,7 +70,10 @@
     secretAchievementDescription: document.querySelector("#secret-achievement-description"),
     victoryForm: document.querySelector("#victory-form"),
     playerName: document.querySelector("#player-name"),
+    playerNickname: document.querySelector("#player-nickname"),
     visitorPlace: document.querySelector("#visitor-place"),
+    competitionOption: document.querySelector("#competition-option"),
+    joinCompetition: document.querySelector("#join-competition"),
     victorySignature: document.querySelector("#victory-signature"),
     retryRecipe: document.querySelector("#retry-recipe"),
     playAgain: document.querySelector("#play-again"),
@@ -76,6 +87,9 @@
     didYouKnow: document.querySelector("#did-you-know"),
     didYouKnowText: document.querySelector("#did-you-know-text"),
     didYouKnowClose: document.querySelector("#did-you-know-close"),
+    leaderboardList: document.querySelector("#leaderboard-list"),
+    leaderboardEmpty: document.querySelector("#leaderboard-empty"),
+    exportRanking: document.querySelector("#export-ranking"),
     yaguareteCursor: document.querySelector("#yaguarete-cursor")
   };
 
@@ -107,9 +121,24 @@
     factHideTimer: null,
     factIndex: Math.floor(Math.random() * Math.max(1, DATA.didYouKnow?.length || 1)),
     failureVariantCounts: {}
+    ,difficulty: "easy"
+    ,requiredIds: []
+    ,score: 1000
+    ,gameDeadline: 0
+    ,gameTimerId: null
   };
 
   const ACHIEVEMENT_STORAGE_KEY = "fogon-noa-logros-ocultos";
+  const RANKING_STORAGE_KEY = "fogon-noa-ranking-v1";
+  const DIFFICULTIES = {
+    easy: { name: "Fácil", errors: 3, traps: 2, timer: 0 },
+    medium: { name: "Media", errors: 2, traps: 5, timer: 0 },
+    hard: { name: "Difícil", errors: 1, traps: 7, timer: 180 }
+  };
+  const TRAP_INGREDIENTS = ["sal", "azucar", "canela", "anis", "nuez_moscada", "laurel", "oregano", "pimienta"];
+  const SEASONINGS = {
+    empanadas: ["sal", "pimienta"], humita: ["sal", "pimienta"], locro: ["sal", "laurel"], tamales: ["sal", "pimienta"]
+  };
   const unlockedAchievements = loadUnlockedAchievements();
 
   function loadUnlockedAchievements() {
@@ -154,20 +183,36 @@
     enabled: true,
     sequenceTimer: null,
     nextStepAt: 0,
-    step: 0
+    step: 0,
+    trackId: window.localStorage.getItem("fogon-noa-pista") || "fogon"
   };
 
-  const CHIPTUNE_STEP_SECONDS = 0.16;
-  const CHIPTUNE_SEQUENCE = [
-    { lead: 69, bass: 45 }, { lead: 72 }, { lead: 76 }, { lead: null },
-    { lead: 74, bass: 40 }, { lead: 72 }, { lead: 69 }, { lead: 67 },
-    { lead: 64, bass: 41 }, { lead: 67 }, { lead: 71 }, { lead: 69 },
-    { lead: 67, bass: 43 }, { lead: 64 }, { lead: 62 }, { lead: null },
-    { lead: 69, bass: 45 }, { lead: 71 }, { lead: 72 }, { lead: 76 },
-    { lead: 79, bass: 40 }, { lead: 76 }, { lead: 74 }, { lead: 72 },
-    { lead: 74, bass: 41 }, { lead: 72 }, { lead: 69 }, { lead: 67 },
-    { lead: 64, bass: 43 }, { lead: 67 }, { lead: 69 }, { lead: null }
-  ];
+  function createChiptune(leads, basses, stepSeconds = 0.16) {
+    return {
+      stepSeconds,
+      sequence: leads.map((lead, index) => ({ lead, bass: index % 4 === 0 ? basses[(index / 4) % basses.length] : null }))
+    };
+  }
+
+  const CHIPTUNE_TRACKS = {
+    korobeiniki: createChiptune([64,59,60,62,60,59,57,57,60,64,62,60,59,59,60,62,64,60,57,57,null,62,65,69,67,65,64,60,64,62,60,59,59,60,62,64,60,57,57], [45,40,41,43], .13),
+    turca: createChiptune([71,69,68,69,72,null,74,72,71,72,76,null,77,76,74,72,71,69,68,69,72,74,72,71,69,68,69,71,69,null,null], [45,40,44,45], .125),
+    cancan: createChiptune([67,67,69,71,72,72,71,69,67,67,69,71,72,69,67,null,72,72,74,76,77,76,74,72,71,69,67,69,71,67,null,null], [43,48,45,50], .12),
+    montana: createChiptune([59,61,62,64,66,62,66,70,59,61,62,64,66,62,66,69,57,59,60,62,64,60,64,68,57,59,60,62,64,60,64,67], [35,38,33,40], .145),
+    danubio: createChiptune([62,null,66,69,69,null,69,null,73,null,73,null,66,null,66,null,62,null,66,69,69,null,69,null,74,null,74,null,67,null,67,null], [38,45,42,43], .19),
+    fogon: createChiptune([69,72,76,null,74,72,69,67,64,67,71,69,67,64,62,null,69,71,72,76,79,76,74,72,74,72,69,67,64,67,69,null], [45,40,41,43], .16),
+    seul: createChiptune([76,79,81,83,81,79,76,74,76,79,83,86,84,83,79,null,74,76,79,81,79,76,74,71,72,76,79,83,81,79,76,null], [45,41,43,40], .135),
+    yaguarete: createChiptune([67,69,72,74,72,69,74,76,79,76,74,72,69,67,64,null,67,72,76,79,76,72,69,67,64,67,69,72,74,72,69,null], [43,38,40,41], .145),
+    carnaval: createChiptune([72,76,79,84,83,79,76,72,74,77,81,86,84,81,77,74,72,74,76,79,81,79,76,74,72,76,79,81,79,76,72,null], [36,41,38,43], .12),
+    luna: createChiptune([69,null,72,76,74,null,72,69,67,null,69,72,71,null,67,64,69,72,76,79,76,74,72,69,67,69,72,74,72,69,67,null], [45,41,43,40], .19),
+    chala: createChiptune([64,67,71,72,71,67,64,62,64,69,72,76,74,72,69,67,64,67,69,71,72,76,74,72,71,69,67,64,62,64,67,null], [40,45,41,43], .15),
+    altiplano: createChiptune([62,67,69,74,72,69,67,62,65,69,72,77,76,72,69,65,62,65,67,69,72,74,76,77,76,74,72,69,67,65,62,null], [38,43,41,36], .17),
+    estelar: createChiptune([79,83,86,88,86,83,81,79,76,79,83,86,84,81,79,76,74,76,79,81,83,81,79,76,74,72,74,76,79,76,74,null], [43,40,45,41], .14)
+  };
+
+  function currentChiptune() {
+    return CHIPTUNE_TRACKS[audioState.trackId] || CHIPTUNE_TRACKS.fogon;
+  }
 
   let scrollButtonFrame = null;
 
@@ -268,12 +313,13 @@
   }
 
   function scheduleMusicStep(stepIndex, start) {
-    const step = CHIPTUNE_SEQUENCE[stepIndex];
+    const track = currentChiptune();
+    const step = track.sequence[stepIndex];
     if (step.lead) {
       scheduleTone({
         frequency: noteFrequency(step.lead),
         start,
-        duration: CHIPTUNE_STEP_SECONDS * 0.78,
+        duration: track.stepSeconds * 0.78,
         type: "square",
         volume: 0.075,
         destination: audioState.music
@@ -283,7 +329,7 @@
       scheduleTone({
         frequency: noteFrequency(step.bass),
         start,
-        duration: CHIPTUNE_STEP_SECONDS * 3.2,
+        duration: track.stepSeconds * 3.2,
         type: "triangle",
         volume: 0.095,
         destination: audioState.music
@@ -293,7 +339,7 @@
       scheduleTone({
         frequency: noteFrequency(step.lead - 12),
         start: start + 0.018,
-        duration: CHIPTUNE_STEP_SECONDS * 0.48,
+        duration: track.stepSeconds * 0.48,
         type: "square",
         volume: 0.025,
         destination: audioState.music
@@ -305,9 +351,25 @@
     const context = audioState.context;
     if (!context || !audioState.enabled) return;
     while (audioState.nextStepAt < context.currentTime + 0.28) {
+      const track = currentChiptune();
       scheduleMusicStep(audioState.step, audioState.nextStepAt);
-      audioState.step = (audioState.step + 1) % CHIPTUNE_SEQUENCE.length;
-      audioState.nextStepAt += CHIPTUNE_STEP_SECONDS;
+      audioState.step = (audioState.step + 1) % track.sequence.length;
+      audioState.nextStepAt += track.stepSeconds;
+    }
+  }
+
+  function changeMusicTrack() {
+    const nextTrack = el.musicSelect.value;
+    if (!CHIPTUNE_TRACKS[nextTrack]) return;
+    audioState.trackId = nextTrack;
+    audioState.step = 0;
+    try { window.localStorage.setItem("fogon-noa-pista", nextTrack); } catch (_) {}
+    const wasPlaying = Boolean(audioState.sequenceTimer);
+    if (wasPlaying) {
+      stopChiptune();
+      startChiptune();
+    } else if (audioState.enabled) {
+      startChiptune();
     }
   }
 
@@ -610,6 +672,10 @@
     state.heatDirectionChanges = 0;
     state.recoveredHeat = false;
     state.sessionAchievements = new Set();
+    state.score = 1000;
+    state.requiredIds = requiredForDifficulty(DATA.recipes[recipeId]);
+    state.gameDeadline = DIFFICULTIES[state.difficulty].timer ? Date.now() + DIFFICULTIES[state.difficulty].timer * 1000 : 0;
+    startGameTimer();
     state.sessionActive = true;
     hideDidYouKnow(false);
     el.menuNotice.hidden = true;
@@ -617,6 +683,38 @@
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     renderGame();
     armIdleTimer();
+  }
+
+  function requiredForDifficulty(current) {
+    const required = [...current.required];
+    if (state.difficulty !== "easy") {
+      (SEASONINGS[current.family] || []).forEach((id) => { if (!required.includes(id)) required.push(id); });
+    }
+    return required;
+  }
+
+  function startGameTimer() {
+    window.clearInterval(state.gameTimerId);
+    el.gameTimer.hidden = !state.gameDeadline;
+    if (!state.gameDeadline) return;
+    updateGameTimer();
+    state.gameTimerId = window.setInterval(updateGameTimer, 250);
+  }
+
+  function updateGameTimer() {
+    if (!state.gameDeadline || state.completed) return;
+    const remaining = Math.max(0, state.gameDeadline - Date.now());
+    const seconds = Math.ceil(remaining / 1000);
+    el.gameTimer.textContent = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    el.gameTimer.classList.toggle("is-warning", seconds <= 30);
+    if (!remaining) scheduleFailure("timeOut", 50);
+  }
+
+  function updateLiveScore() {
+    const heatPenalty = state.heat < 40 ? (40 - state.heat) * 2 : state.heat > 75 ? (state.heat - 75) * 2 : 0;
+    const live = Math.max(0, Math.round(state.score - heatPenalty));
+    el.liveScore.textContent = `${live} puntos`;
+    el.difficultyBadge.textContent = DIFFICULTIES[state.difficulty].name;
   }
 
   function renderGame() {
@@ -637,13 +735,17 @@
     renderVessel(current);
     renderProgress(current);
     renderHeat();
+    updateLiveScore();
   }
 
   function renderPantry(current) {
     el.ingredientGrid.replaceChildren();
 
-    const missing = current.pantry.filter((id) => !state.pantryOrder.includes(id));
-    state.pantryOrder = state.pantryOrder.filter((id) => current.pantry.includes(id)).concat(shuffleIngredients(missing));
+    const seasoningIds = state.requiredIds.filter((id) => !current.pantry.includes(id));
+    const traps = shuffleIngredients(TRAP_INGREDIENTS.filter((id) => !state.requiredIds.includes(id))).slice(0, DIFFICULTIES[state.difficulty].traps);
+    const available = [...new Set([...current.pantry, ...seasoningIds, ...traps])];
+    const missing = available.filter((id) => !state.pantryOrder.includes(id));
+    state.pantryOrder = state.pantryOrder.filter((id) => available.includes(id)).concat(shuffleIngredients(missing));
 
     state.pantryOrder.forEach((id) => {
       const item = ingredient(id);
@@ -670,7 +772,7 @@
 
   function renderChecklist(current) {
     el.checklist.replaceChildren();
-    current.required.forEach((id) => {
+    state.requiredIds.forEach((id) => {
       const item = ingredient(id);
       const done = state.added.has(id);
       const li = document.createElement("li");
@@ -711,8 +813,8 @@
   }
 
   function renderProgress(current) {
-    const completed = current.required.filter((id) => state.added.has(id)).length;
-    const total = current.required.length;
+    const completed = state.requiredIds.filter((id) => state.added.has(id)).length;
+    const total = state.requiredIds.length;
     const percent = total ? Math.round((completed / total) * 100) : 0;
     el.progressLabel.textContent = `${completed} de ${total}`;
     el.progressBar.style.width = `${percent}%`;
@@ -720,14 +822,18 @@
 
   function renderHeat() {
     const heat = Math.max(0, Math.min(100, Math.round(state.heat)));
-    const label = heat < 35
-      ? "Fuego bajo"
+    const label = heat === 0
+      ? "Fogón apagado"
+      : heat < 20
+        ? "Sin cocción"
+        : heat < 40
+          ? "Cocción insuficiente"
       : heat <= 75
         ? "Fuego parejo"
         : heat < 95
           ? "¡Fuego muy fuerte!"
           : "¡Se está quemando!";
-    const level = heat < 35 ? "low" : heat <= 75 ? "ideal" : heat < 95 ? "warning" : "critical";
+    const level = heat < 40 ? "low" : heat <= 75 ? "ideal" : heat < 95 ? "warning" : "critical";
 
     el.heatMeter.style.setProperty("--heat-level", `${heat}%`);
     el.heatMeter.setAttribute("aria-valuenow", String(heat));
@@ -746,7 +852,7 @@
     state.heatMoves += 1;
     if (state.lastHeatDirection && direction !== state.lastHeatDirection) state.heatDirectionChanges += 1;
     state.lastHeatDirection = direction;
-    state.heat = Math.max(10, Math.min(100, state.heat + delta));
+    state.heat = Math.max(0, Math.min(100, state.heat + delta));
 
     if (previousHeat >= 80 && state.heat <= 75) {
       state.recoveredHeat = true;
@@ -759,7 +865,8 @@
     }
 
     renderHeat();
-    if (state.heat >= 100) scheduleFailure("burned", 700);
+    updateLiveScore();
+    if (state.heat >= 100) scheduleFailure("fire", 500);
   }
 
   function scheduleFailure(type, delayMs = 900) {
@@ -775,7 +882,7 @@
     noteActivity();
     const current = recipe();
     const variation = current.variations.find((rule) => rule.anyOf.includes(id));
-    const belongsToRecipe = current.required.includes(id);
+    const belongsToRecipe = state.requiredIds.includes(id);
     const isOptional = (current.optional || []).includes(id);
 
     if (!belongsToRecipe && !isOptional && !variation) {
@@ -784,7 +891,6 @@
     }
 
     state.added.add(id);
-    state.heat = Math.min(100, state.heat + 4);
     playIngredientSound(current.vessel);
     spawnIngredientBurst(id);
 
@@ -795,7 +901,7 @@
     }
 
     if (state.heat >= 100) {
-      scheduleFailure("burned", 700);
+      scheduleFailure("fire", 500);
       return;
     }
 
@@ -842,14 +948,18 @@
     const explanation = familyReasons[id] || familyReasons.default || "No figura en la comanda de esta versión.";
 
     state.wrongAttempts += 1;
+    state.score = Math.max(0, state.score - (state.difficulty === "hard" ? 400 : state.difficulty === "medium" ? 180 : 100));
+    updateLiveScore();
     const repeatedCount = (state.wrongIngredients.get(id) || 0) + 1;
     state.wrongIngredients.set(id, repeatedCount);
     state.wrongSequence.push(id);
     playErrorSound();
     el.toastTitle.textContent = "Ese ingrediente no va en esta receta";
-    el.toastMessage.textContent = state.wrongAttempts >= 3
-      ? `${rejected.name} marca error en ${current.name}. ${explanation} Después de tres intentos incorrectos, la preparación tomó un camino inesperado.`
-      : `${rejected.name} marca error en ${current.name}. ${explanation} No perdiste ningún avance.`;
+    const errorLimit = DIFFICULTIES[state.difficulty].errors;
+    const remainingErrors = Math.max(0, errorLimit - state.wrongAttempts);
+    el.toastMessage.textContent = state.wrongAttempts >= errorLimit
+      ? `${rejected.name} marca error en ${current.name}. ${explanation} Ya no quedan oportunidades en este modo.`
+      : `${rejected.name} marca error en ${current.name}. ${explanation} Te ${remainingErrors === 1 ? "queda 1 oportunidad" : `quedan ${remainingErrors} oportunidades`}.`;
     el.dropZone.classList.remove("is-rejected");
     token?.classList.remove("is-rejected");
     void el.dropZone.offsetWidth;
@@ -860,7 +970,7 @@
       token?.classList.remove("is-rejected");
     }, 720);
     showToast(9000, "error");
-    if (state.wrongAttempts >= 3) scheduleFailure(failureFromWrongIngredients(id, repeatedCount), 1250);
+    if (state.wrongAttempts >= errorLimit) scheduleFailure(failureFromWrongIngredients(id, repeatedCount), 1250);
   }
 
   function failureFromWrongIngredients(lastId, repeatedCount) {
@@ -882,6 +992,7 @@
       anyOf: [...variation.anyOf]
     });
     state.recipeId = variation.target;
+    state.requiredIds = requiredForDifficulty(DATA.recipes[state.recipeId]);
     unlockAchievement("viajero_regional");
     renderGame();
 
@@ -907,14 +1018,19 @@
   function checkCompletion() {
     const current = recipe();
     if (!current || state.completed || state.ending) return;
-    if (!current.required.every((id) => state.added.has(id))) return;
-    if (state.heat <= 25) {
-      scheduleFailure("undercooked", 450);
-    } else if (state.heatMoves >= 6 && state.heatDirectionChanges >= 3) {
-      scheduleFailure("unstable", 450);
-    } else {
-      completeRecipe();
-    }
+    if (!state.requiredIds.every((id) => state.added.has(id))) return;
+    finishCookingResult();
+  }
+
+  function finishCookingResult() {
+    if (state.heat <= 15) return scheduleFailure("raw", 350);
+    if (state.heat < 40) return scheduleFailure("undercooked", 350);
+    if (state.heat >= 100) return scheduleFailure("fire", 250);
+    if (state.heat > 85) return scheduleFailure("burned", 350);
+    if (state.heatMoves >= 8 && state.heatDirectionChanges >= 4) return scheduleFailure("unstable", 350);
+    const heatPenalty = state.heat < 40 ? (40 - state.heat) * 3 : state.heat > 75 ? (state.heat - 75) * 3 : 0;
+    state.score = Math.max(0, Math.round(state.score - heatPenalty));
+    completeRecipe();
   }
 
   function latestSessionAchievement() {
@@ -931,6 +1047,9 @@
         achievement: "Aprendiz del Humo Norteño",
         achievementId: "fuego_descontrolado"
       },
+      fire: { title: "¡Incendio en la cocina!", message: `El fuego llegó al máximo mientras preparabas ${current.name}. La partida se detuvo por seguridad.`, achievement: "Jefe/a de Bomberos del Fogón", achievementId: "cocina_en_llamas" },
+      raw: { title: "¡Todavía estaba crudo!", message: `${current.name} llegó al plato prácticamente sin calor. Los ingredientes necesitan tiempo y temperatura para cocinarse.`, achievement: "Catador/a de Masa Cruda", achievementId: "catador_de_masa_cruda" },
+      timeOut: { title: "¡Se terminó el tiempo!", message: `El cronómetro del modo difícil llegó a cero antes de completar ${current.name}.`, achievement: "Rival del Reloj Norteño", achievementId: "reloj_sin_piedad" },
       spoiled: {
         title: "¡La receta tomó un camino extraño!",
         message: `Tres ingredientes que no pertenecían a la comanda estropearon ${current.name}. Leé las explicaciones y volvé a probar otra combinación.`,
@@ -976,6 +1095,9 @@
     };
     const outcome = outcomes[type] || outcomes.spoiled;
     const copyVariants = {
+      fire: [{ title: "¡Incendio en la cocina!", message: `El fuego llegó al máximo y ${current.name} quedó entre humo y llamas. La partida se detuvo por seguridad.`, tip: "Nunca lleves el indicador al extremo superior" }],
+      raw: [{ title: "¡Todavía estaba crudo!", message: `${current.name} fue servido con el fogón casi apagado y no alcanzó una cocción segura.`, tip: "Encendé el fuego y mantenelo dentro de la zona ideal" }],
+      timeOut: [{ title: "¡El reloj llegó primero!", message: `El tiempo del modo difícil terminó antes de completar ${current.name}.`, tip: "Leé la comanda antes de empezar y mantené un ritmo constante" }],
       burned: [
         { title: "¡El fogón se descontroló!", message: `El fuego quedó demasiado fuerte y ${current.name} terminó quemándose. La zona roja indica que es momento de bajar la intensidad.`, tip: "Bajá el fuego antes de llegar a la zona roja" },
         { title: "¡Mucho fuego para una sola olla!", message: `${current.name} recibió más calor del que podía soportar. En la cocina regional, el tiempo y la paciencia también son ingredientes.`, tip: "Mantené el indicador en la franja de fuego parejo" },
@@ -1018,6 +1140,7 @@
     state.failureVariantCounts[type] = variantIndex + 1;
 
     state.completed = true;
+    window.clearInterval(state.gameTimerId);
     state.ending = false;
     stopIdleTimer();
     hideToast();
@@ -1040,7 +1163,7 @@
     el.playAgain.textContent = "Elegir otro plato";
     el.victoryQrCard.hidden = true;
     renderSecretAchievement(outcome.achievementId);
-    const statusByOutcome = { burned: "Preparación quemada", spoiled: "Mezcla estropeada", stubborn: "Ingrediente repetido", sweetChaos: "Exceso de dulzor", dairyChaos: "Textura alterada", meatChaos: "Carnes incompatibles", undercooked: "Preparación sin cocción", unstable: "Cocción despareja" };
+    const statusByOutcome = { fire: "Incendio en la cocina", raw: "Preparación cruda", timeOut: "Tiempo agotado", burned: "Preparación quemada", spoiled: "Mezcla estropeada", stubborn: "Ingrediente repetido", sweetChaos: "Exceso de dulzor", dairyChaos: "Textura alterada", meatChaos: "Carnes incompatibles", undercooked: "Preparación sin cocción", unstable: "Cocción despareja" };
     el.statusText.textContent = statusByOutcome[type] || "Preparación estropeada";
     el.idleIndicator.hidden = true;
     activateScreen(el.completeScreen);
@@ -1052,6 +1175,7 @@
 
   function completeRecipe() {
     state.completed = true;
+    window.clearInterval(state.gameTimerId);
     state.ending = false;
     playSuccessSound();
     hideToast();
@@ -1064,10 +1188,11 @@
     el.achievementLabel.textContent = "Título obtenido";
     el.achievementIcon.textContent = "🏵️";
     el.completeTitle.textContent = "¡El fogón está de fiesta!";
-    el.completeMessage.textContent = `Completaste ${current.name}. Cada ingrediente cuenta una historia de territorio, intercambio y memoria.`;
-    el.achievementTitle.textContent = current.achievement;
+    el.completeMessage.textContent = `Completaste ${current.name} en modo ${DIFFICULTIES[state.difficulty].name} y obtuviste ${state.score} de 1000 puntos.`;
+    el.achievementTitle.textContent = state.score >= 970 ? `Campeón/a Olímpico/a de ${current.name}` : state.score >= 850 ? "Gran Maestro/a del Fogón" : current.achievement;
     el.victoryForm.reset();
     el.victoryForm.hidden = false;
+    el.competitionOption.hidden = state.difficulty === "easy";
     el.victorySignature.hidden = true;
     el.victorySignature.textContent = "";
     el.retryRecipe.hidden = true;
@@ -1087,6 +1212,7 @@
   function personalizeVictory(event) {
     event.preventDefault();
     const playerName = el.playerName.value.trim();
+    const playerNickname = el.playerNickname.value.trim().replace(/^@+/, "");
     const visitorPlace = el.visitorPlace.value.trim();
 
     if (!playerName) {
@@ -1096,12 +1222,156 @@
       return;
     }
 
+    if (el.joinCompetition.checked && state.difficulty !== "easy") {
+      if (!playerNickname) {
+        el.playerNickname.setCustomValidity("Elegí un nick de juego para participar en la competencia.");
+        el.playerNickname.reportValidity();
+        el.playerNickname.focus();
+        return;
+      }
+      const category = rankingCategory(recipe());
+      const normalizedNick = playerNickname.toLocaleLowerCase("es");
+      const nicknameTaken = loadRanking().some((entry) => categoryFromEntry(entry) === category && `${entry.nickname || entry.name}`.toLocaleLowerCase("es") === normalizedNick);
+      if (nicknameTaken) {
+        el.playerNickname.setCustomValidity(`El nick @${playerNickname} ya participa en esta categoría. Elegí otro para evitar confusiones.`);
+        el.playerNickname.reportValidity();
+        el.playerNickname.focus();
+        return;
+      }
+    }
+
     el.playerName.setCustomValidity("");
+    el.playerNickname.setCustomValidity("");
     el.completeTitle.textContent = `¡Felicitaciones, ${playerName}!`;
     el.victorySignature.textContent = visitorPlace
       ? `Este reconocimiento celebra a ${playerName}, que nos visita desde ${visitorPlace}.`
       : `Este reconocimiento celebra a ${playerName}.`;
     el.victorySignature.hidden = false;
+    if (el.joinCompetition.checked && state.difficulty !== "easy") {
+      const result = saveRankingEntry({ name: playerName, nickname: playerNickname, place: visitorPlace || "Sin localidad", recipe: recipe().name, category: rankingCategory(recipe()), difficulty: state.difficulty, score: state.score });
+      if (result.position <= 3) {
+        const prizes = [
+          { icon: "🥇", name: "Medalla virtual de oro" },
+          { icon: "🥈", name: "Medalla virtual de plata" },
+          { icon: "🥉", name: "Medalla virtual de bronce" }
+        ];
+        const prize = prizes[result.position - 1];
+        el.achievementIcon.textContent = prize.icon;
+        el.achievementLabel.textContent = "Premio virtual · posición actual";
+        el.achievementTitle.textContent = `${prize.name} en ${result.categoryTitle}`;
+        el.victorySignature.textContent += ` ¡Entraste al puesto ${result.position} y recibiste la ${prize.name.toLowerCase()}!`;
+      } else {
+        el.victorySignature.textContent += ` Tu puntaje quedó en el puesto ${result.position} de ${result.categoryTitle}.`;
+      }
+      el.joinCompetition.checked = false;
+    }
+  }
+
+  function loadRanking() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(RANKING_STORAGE_KEY) || "[]");
+      return Array.isArray(saved) ? saved : [];
+    } catch (_) { return []; }
+  }
+
+  function saveRankingEntry(entry) {
+    const ranking = loadRanking();
+    const createdAt = new Date().toISOString();
+    const record = { ...entry, id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`, createdAt };
+    ranking.push(record);
+    ranking.sort((a, b) => b.score - a.score || Number(b.difficulty === "hard") - Number(a.difficulty === "hard") || a.createdAt.localeCompare(b.createdAt));
+    window.localStorage.setItem(RANKING_STORAGE_KEY, JSON.stringify(ranking.slice(0, 200)));
+    renderLeaderboard();
+    const categoryEntries = ranking.filter((item) => categoryFromEntry(item) === entry.category).sort((a, b) => b.score - a.score || Number(b.difficulty === "hard") - Number(a.difficulty === "hard") || a.createdAt.localeCompare(b.createdAt));
+    const position = categoryEntries.findIndex((item) => item.id === record.id) + 1;
+    const categoryTitle = { empanadas: "Empanadas", humitas: "Humitas", locro: "Locro", tamales: "Tamales" }[entry.category];
+    return { position, categoryTitle };
+  }
+
+  function rankingCategory(current) {
+    if (current.family === "empanadas") return "empanadas";
+    if (current.family === "humita") return "humitas";
+    if (current.family === "locro") return "locro";
+    return "tamales";
+  }
+
+  function categoryFromEntry(entry) {
+    if (entry.category) return entry.category;
+    const value = `${entry.recipe || ""}`.toLocaleLowerCase("es");
+    if (value.includes("empanada")) return "empanadas";
+    if (value.includes("humita")) return "humitas";
+    if (value.includes("locro")) return "locro";
+    return "tamales";
+  }
+
+  function renderLeaderboard() {
+    const ranking = loadRanking();
+    el.leaderboardList.replaceChildren();
+    el.leaderboardEmpty.hidden = ranking.length > 0;
+    const categories = [
+      { id: "empanadas", icon: "🥟", title: "Empanadas" },
+      { id: "humitas", icon: "🌽", title: "Humitas" },
+      { id: "locro", icon: "🥘", title: "Locro" },
+      { id: "tamales", icon: "🫔", title: "Tamales" }
+    ];
+    categories.forEach((category) => {
+      const entries = ranking.filter((entry) => categoryFromEntry(entry) === category.id).sort((a, b) => b.score - a.score || Number(b.difficulty === "hard") - Number(a.difficulty === "hard") || a.createdAt.localeCompare(b.createdAt));
+      const section = document.createElement("section");
+      section.className = "leaderboard-category";
+      section.innerHTML = `<header><span aria-hidden="true">${category.icon}</span><div><strong>${category.title}</strong><small>Podio de tres ganadores</small></div></header>`;
+      const list = document.createElement("ol");
+      list.className = "leaderboard-list";
+      if (!entries.length) {
+        const empty = document.createElement("li");
+        empty.className = "category-empty";
+        empty.textContent = "Sin participantes todavía";
+        list.append(empty);
+      }
+      entries.forEach((entry, index) => {
+        const item = document.createElement("li");
+        if (index < 3) item.classList.add("is-podium", `is-place-${index + 1}`);
+        const displayNick = entry.nickname || entry.name;
+        const positionLabel = index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1;
+        item.innerHTML = `<span class="leader-position" aria-label="Puesto ${index + 1}">${positionLabel}</span><div class="leader-person"><strong>${escapeHtml(entry.name)}</strong><b>@${escapeHtml(displayNick)}</b><small>${escapeHtml(entry.place)} · ${escapeHtml(entry.recipe)} · ${entry.difficulty === "hard" ? "Difícil" : "Media"}</small></div><strong class="leader-score">${entry.score}</strong>`;
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "leader-delete";
+        removeButton.dataset.deleteRanking = entry.id || entry.createdAt;
+        removeButton.setAttribute("aria-label", `Eliminar a ${entry.name} del ranking`);
+        removeButton.title = "Eliminar participante";
+        removeButton.textContent = "×";
+        item.append(removeButton);
+        list.append(item);
+      });
+      section.append(list);
+      el.leaderboardList.append(section);
+    });
+  }
+
+  function deleteRankingEntry(recordId) {
+    const ranking = loadRanking();
+    const entry = ranking.find((item) => (item.id || item.createdAt) === recordId);
+    if (!entry || !window.confirm(`¿Eliminar a ${entry.name} del ranking? Esta acción no se puede deshacer.`)) return;
+    const updated = ranking.filter((item) => (item.id || item.createdAt) !== recordId);
+    window.localStorage.setItem(RANKING_STORAGE_KEY, JSON.stringify(updated));
+    renderLeaderboard();
+  }
+
+  function escapeHtml(value) {
+    const node = document.createElement("span");
+    node.textContent = String(value);
+    return node.innerHTML;
+  }
+
+  function exportRankingCsv() {
+    const ranking = loadRanking();
+    const rows = [["Nombre", "Nick", "Localidad", "Categoría", "Plato", "Dificultad", "Puntos", "Fecha"], ...ranking.map((entry) => [entry.name, entry.nickname || entry.name, entry.place, categoryFromEntry(entry), entry.recipe, entry.difficulty, entry.score, entry.createdAt])];
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\r\n");
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }));
+    link.download = `ranking-cocina-noa-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
   function generateQr() {
@@ -1188,6 +1458,7 @@
     stopIdleTimer();
     window.clearTimeout(state.completionTimer);
     window.clearTimeout(state.toastTimer);
+    window.clearInterval(state.gameTimerId);
     cancelDrag();
     hideToast();
     closeFamily();
@@ -1208,6 +1479,10 @@
     state.recoveredHeat = false;
     state.sessionAchievements = new Set();
     state.sessionActive = false;
+    state.requiredIds = [];
+    state.score = 1000;
+    state.gameDeadline = 0;
+    el.gameTimer.hidden = true;
 
     activateScreen(el.menuScreen);
     el.menuScreen.scrollTop = 0;
@@ -1219,6 +1494,7 @@
     el.secretAchievement.hidden = true;
     el.completeScreen.classList.remove("is-failed");
     scheduleDidYouKnow(inactivity ? 4500 : 6500);
+    renderLeaderboard();
 
     if (inactivity) {
       el.menuNotice.textContent = "La experiencia se reinició por inactividad. ¡Elegí un plato para volver a cocinar!";
@@ -1367,6 +1643,9 @@
     const button = event.target.closest("[data-ingredient]");
     if (button) toggleIngredient(button.dataset.ingredient);
   });
+  el.ingredientGrid.addEventListener("scroll", () => {
+    state.suppressClickUntil = Date.now() + 220;
+  }, { passive: true });
 
   el.addedChips.addEventListener("click", (event) => {
     const chip = event.target.closest("[data-remove-ingredient]");
@@ -1386,13 +1665,28 @@
   el.homeButton.addEventListener("click", () => resetToMenu());
   el.playAgain.addEventListener("click", () => resetToMenu());
   el.retryRecipe.addEventListener("click", retryCurrentRecipe);
-  el.heatDown.addEventListener("click", () => adjustHeat(-20));
-  el.heatUp.addEventListener("click", () => adjustHeat(20));
+  el.heatDown.addEventListener("click", () => adjustHeat(-10));
+  el.heatUp.addEventListener("click", () => adjustHeat(10));
+  el.pantryScrollUp.addEventListener("click", () => el.ingredientGrid.scrollBy({ top: -220, behavior: "smooth" }));
+  el.pantryScrollDown.addEventListener("click", () => el.ingredientGrid.scrollBy({ top: 220, behavior: "smooth" }));
+  el.difficultyOptions.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-difficulty]");
+    if (!button) return;
+    state.difficulty = button.dataset.difficulty;
+    el.difficultyOptions.querySelectorAll("[data-difficulty]").forEach((option) => option.classList.toggle("is-selected", option === button));
+  });
   el.victoryForm.addEventListener("submit", personalizeVictory);
   el.playerName.addEventListener("input", () => el.playerName.setCustomValidity(""));
+  el.playerNickname.addEventListener("input", () => el.playerNickname.setCustomValidity(""));
   el.toastClose.addEventListener("click", hideToast);
   el.didYouKnowClose.addEventListener("click", () => hideDidYouKnow(true));
+  el.exportRanking.addEventListener("click", exportRankingCsv);
+  el.leaderboardList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-delete-ranking]");
+    if (button) deleteRankingEntry(button.dataset.deleteRanking);
+  });
   el.soundToggle.addEventListener("click", toggleSound);
+  el.musicSelect.addEventListener("change", changeMusicTrack);
   el.fullscreenToggle.addEventListener("click", toggleFullscreenMode);
   el.scrollTopButton.addEventListener("click", scrollMainPageToTop);
   el.mobileGameNav.addEventListener("click", (event) => {
@@ -1420,7 +1714,9 @@
 
   updateFullscreenButton();
   updateSoundButton();
+  if (CHIPTUNE_TRACKS[audioState.trackId]) el.musicSelect.value = audioState.trackId;
   initYaguareteCursor();
   renderCookbook();
+  renderLeaderboard();
   resetToMenu();
 })();

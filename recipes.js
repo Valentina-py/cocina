@@ -16,6 +16,9 @@ window.KITCHEN_DATA = {
       title: "Aprendiz del Humo Norteño",
       description: "Avivaste el fuego hasta descubrir que hasta la mejor olla necesita paciencia."
     },
+    cocina_en_llamas: { icon: "🚒", title: "Jefe/a de Bomberos del Fogón", description: "Llevaste la temperatura al límite y descubriste por qué el fuego nunca se deja sin vigilancia." },
+    catador_de_masa_cruda: { icon: "🥣", title: "Catador/a de Masa Cruda", description: "Serviste antes de que el calor pudiera transformar los ingredientes." },
+    reloj_sin_piedad: { icon: "⏱️", title: "Rival del Reloj Norteño", description: "El tiempo del modo difícil terminó antes que la preparación." },
     mezcla_imposible: {
       icon: "🫧",
       title: "Alquimista del Desastre",
@@ -102,7 +105,14 @@ window.KITCHEN_DATA = {
     limon: { name: "Limón", icon: "🍋", tone: "yellow" },
     aceituna: { name: "Aceitunas", icon: "🫒", tone: "green" },
     pasas: { name: "Pasas de uva", icon: "🍇", tone: "purple" },
-    azucar: { name: "Azúcar", icon: "◻️", tone: "cream" }
+    azucar: { name: "Azúcar", icon: "◻️", tone: "cream" },
+    sal: { name: "Sal fina", icon: "◻️", tone: "cream" },
+    pimienta: { name: "Pimienta negra", icon: "⚫", tone: "ochre" },
+    oregano: { name: "Orégano", icon: "🌿", tone: "green" },
+    laurel: { name: "Laurel", icon: "🍃", tone: "green" },
+    nuez_moscada: { name: "Nuez moscada", icon: "🟤", tone: "ochre" },
+    anis: { name: "Anís", icon: "✦", tone: "ochre" },
+    canela: { name: "Canela", icon: "🪵", tone: "ochre" }
   },
 
   families: {
